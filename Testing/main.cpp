@@ -22,7 +22,21 @@ int main() {
 	std::cout << __FUNCSIG__ << '\n';
 
 	for (auto iter = st.begin(); iter != st.end(); ++iter)
-		std::cout << *iter << '\n';
+		std::cout << iter->value << '\n';
+
+	std::cout << "\n\n";
+
+	while ( !st.is_empty() ) {
+		std::cout << st.top() << '\n';
+		st.pop();
+	}
+
+	std::cout << '\n';
+	for (int i = 1; i < 101; i++)
+		st.push( i * 2 );
+
+	for (auto iter = st.begin(); iter != st.end(); ++iter)
+		std::cout << iter->value << '\n';
 
 	std::cin.get();
 	return 0;

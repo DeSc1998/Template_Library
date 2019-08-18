@@ -74,12 +74,12 @@ namespace ds {
 				}
 
 
-				value_type& operator * () {
-					return ptr->value;
+				node_type& operator * () {
+					return *ptr;
 				}
 
-				const value_type& operator * () const {
-					return ptr->value;
+				const node_type& operator * () const {
+					return *ptr;
 				}
 
 				node_type* operator -> () {

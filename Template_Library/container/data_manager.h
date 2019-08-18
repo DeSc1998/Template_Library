@@ -189,11 +189,11 @@ namespace ds {
 		}
 
 		value_type& top() {
-			return *_begin;
+			return _begin->value;
 		}
 
 		const value_type& top() const {
-			return *_begin;
+			return _begin->value;
 		}
 
 		void pop() {
@@ -215,7 +215,8 @@ namespace ds {
 
 			for (size_t i = 0; i < new_size && iter != end(); i++) {
 				tmp[i].value = std::move( iter->value );
-				tmp[i].next = iter->next;
+				if ( i != 0 )
+					tmp[i-1].next = &tmp[i];
 				++iter;
 			}
 
