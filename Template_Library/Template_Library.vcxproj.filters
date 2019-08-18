@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Quelldateien">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Ressourcendateien">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien\container">
+      <UniqueIdentifier>{7e713832-94d7-4603-b807-ff1b619537a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\nodes">
+      <UniqueIdentifier>{0ea639ca-8e8b-48cb-841c-cc9cb7f30c2a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="floatingpoint.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="integer.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Typelist.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="World.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector\vector.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="binarytree.h">
+      <Filter>Headerdateien\container</Filter>
+    </ClInclude>
+    <ClInclude Include="list.h">
+      <Filter>Headerdateien\container</Filter>
+    </ClInclude>
+    <ClInclude Include="mono_list.h">
+      <Filter>Headerdateien\container</Filter>
+    </ClInclude>
+    <ClInclude Include="stack.h">
+      <Filter>Headerdateien\container</Filter>
+    </ClInclude>
+    <ClInclude Include="Nodes\duo_node.h">
+      <Filter>Headerdateien\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="Nodes\node.h">
+      <Filter>Headerdateien\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="Nodes\mono_node.h">
+      <Filter>Headerdateien\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="data_manager.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
