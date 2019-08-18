@@ -38,6 +38,21 @@ namespace ds {
 			}
 		}
 
+		reference operator [] ( size_t index ) {
+			if (index < size)
+				return ptr[index];
+			else
+				return ;
+		}
+
+		const reference operator [] ( size_t index ) const {
+			if (index < size)
+				return ptr[index];
+			else
+				return ;
+		}
+
+
 		static void init( pointer ptr, size_t size ) {
 			for (size_t i = 0; i < size; i++)
 				ptr[i] = value_type();
@@ -73,7 +88,7 @@ namespace ds {
 		}
 
 		iterator end() const {
-			return iterator( nullptr );
+			return iterator( ++(&ptr[size-1]) );
 		}
 
 		~data_manager() {
@@ -123,6 +138,21 @@ namespace ds {
 			ptr[index].next = _begin.get();
 			_begin = iterator( &ptr[index] );
 		}
+
+		reference top() {
+			return *_begin;
+		}
+
+		const reference top() const {
+			return *_begin;
+		}
+
+		void pop() {
+			auto next = _begin->next;
+			*_begin = node_type();
+			_begin = iterator( next );
+		}
+
 
 		static void init( node_type* ptr, size_t size ) {
 			for (size_t i = 0; i < size; i++)
@@ -181,7 +211,7 @@ namespace ds {
 	private:
 		size_t size = 10;
 		node_type* ptr = new node_type[size];
-		iterator _begin, _last;
+		iterator _begin;
 
 	public:
 
@@ -215,6 +245,32 @@ namespace ds {
 			link_nodes( ptr[index], *pos );
 		}
 
+		reference at( size_t index ) {
+			iterator iter = _begin;
+			for (size_t i = 0; i <= index && iter != end(); i++)
+				++iter;
+			return *(--iter);
+		}
+
+		const reference at( size_t index ) const {
+			iterator iter = _begin;
+			for (size_t i = 0; i <= index && iter != end(); i++)
+				++iter;
+			return *(--iter);
+		}
+
+		void erase( const reference val ) {
+			for (iterator iter = begin(); iter != end(); iter++ )
+				if ( (*iter).value == val )
+					break;
+			
+			iterator prev = iter, next = iter;
+			--prev; ++next;
+			link_nodes( *prev, *next );
+			*iter = node_type();
+		}
+
+
 		static void init( node_type* ptr, size_t size ) {
 			for (size_t i = 0; i < size; i++)
 				ptr[i] = node_type();
@@ -231,9 +287,6 @@ namespace ds {
 					link_nodes( tmp[i-1], tmp[i] );
 
 				++iter;
-
-				if (iter == _last)
-					_last = iterator( &tmp[i] );
 			}
 
 			size = new_size;
@@ -262,9 +315,7 @@ namespace ds {
 		}
 
 		iterator end() const {
-			iterator _end;
-			(*_end).prev = _last.get();
-			return _end;
+			return iterator();
 		}
 
 		~data_manager() {

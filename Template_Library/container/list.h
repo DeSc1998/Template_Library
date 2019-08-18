@@ -1,23 +1,30 @@
 
 #pragma once
 
-#include "../Nodes/node.h"
+#include <memory>
 
-#include <iterator>
+#include "../Nodes/node.h"
+#include "data_manager.h"
 
 namespace ds {
 
-	template < typename Type >
+	template < 
+		typename Type,
+		typename Manager = data_manager< Type, duo_node<Type> >
+	>
 	class list {
 	public:
 
 		using node_type = duo_node<Type>;
+		//using node_type = Manager::node_type;
 		
 		using iterator = iterators::bi_traverse_iterator<Type>;
+		//using iterator = Manager::iterator;
 
 	private:
 
 		size_t num_elements = 0, size = 10;
+		//Manager data;
 		std::unique_ptr<node_type[]> elements = std::make_unique<node_type[]>( size );
 		iterator _begin;
 		

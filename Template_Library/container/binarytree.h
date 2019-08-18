@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <type_traits>
 #include <memory>
 
 #include "../Nodes/node.h"

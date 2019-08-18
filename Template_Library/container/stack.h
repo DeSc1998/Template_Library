@@ -8,17 +8,21 @@
 
 namespace ds {
 
-	template < typename Type, typename Manager = data_manager<Type, mono_node<Type>> >
+	template < 
+		typename Type,
+		typename Manager = data_manager< Type, mono_node<Type> > 
+	>
 	class stack {
 	public:
 		using node_type = mono_node<Type>;
-
-		const node_type Default = node_type{0u};
+		//using node_type = Manager::node_type;
 
 		using iterator = iterators::traverse_iterator<Type>;
+		//using iterator = Manager::iterator;
 
 	private:
 		size_t current_size = 10, num_elements = 0;
+		//Manager data;
 		node_type* head = nullptr;
 		std::unique_ptr<node_type[]> elements = std::make_unique<node_type[]>( current_size );
 
