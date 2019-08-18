@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Nodes/node.h"
+#include "../Nodes/node.h"
 
 namespace ds {
 
@@ -97,6 +97,33 @@ namespace ds {
 
 	public:
 
+		void insert( const reference val ) {
+			size_t index = find_space();
+			if (index != size) {
+				ptr[index].value = val;
+			}
+			else {
+				resize(size + 10);
+				ptr[index].value = val;
+			}
+
+			ptr[index].next = _begin.get();
+			_begin = iterator( &ptr[index] );
+		}
+
+		void insert( value_type&& val ) {
+			size_t index = find_space();
+			if ( index != size )
+				ptr[index].value = std::move(val);
+			else {
+				resize( size + 10 );
+				ptr[index].value = std::move(val);
+			}
+
+			ptr[index].next = _begin.get();
+			_begin = iterator( &ptr[index] );
+		}
+
 		static void init( node_type* ptr, size_t size ) {
 			for (size_t i = 0; i < size; i++)
 				ptr[i] = node_type();
@@ -154,9 +181,39 @@ namespace ds {
 	private:
 		size_t size = 10;
 		node_type* ptr = new node_type[size];
-		iterator _begin;
+		iterator _begin, _last;
 
 	public:
+
+		void insert( const reference val, iterator pos ) {
+			size_t index = find_space();
+			if (index != size)
+				ptr[index].value = val;
+			else {
+				resize( size + 10 );
+				ptr[index].value = val;
+			}
+
+			iterator prev = pos;
+			--prev;
+			link_nodes( *prev, ptr[index] );
+			link_nodes( ptr[index], *pos );
+		}
+
+		void insert( value_type&& val, iterator pos ) {
+			size_t index = find_space();
+			if (index != size)
+				ptr[index].value = std::move(val);
+			else {
+				resize(size + 10);
+				ptr[index].value = std::move(val);
+			}
+
+			iterator prev = pos;
+			--prev;
+			link_nodes( *prev, ptr[index] );
+			link_nodes( ptr[index], *pos );
+		}
 
 		static void init( node_type* ptr, size_t size ) {
 			for (size_t i = 0; i < size; i++)
@@ -174,6 +231,9 @@ namespace ds {
 					link_nodes( tmp[i-1], tmp[i] );
 
 				++iter;
+
+				if (iter == _last)
+					_last = iterator( &tmp[i] );
 			}
 
 			size = new_size;
@@ -202,7 +262,9 @@ namespace ds {
 		}
 
 		iterator end() const {
-			return iterator(nullptr);
+			iterator _end;
+			(*_end).prev = _last.get();
+			return _end;
 		}
 
 		~data_manager() {
