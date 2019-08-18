@@ -6,11 +6,10 @@
 
 
 int main() {
-	using ds::stack;
 
-	ds::function_pointer<int> ptr = &main;
-	stack<int> st;
+	ds::stack<int> st;
 
+	// push test
 	st.push( 10 );
 	st.push( 14 );
 	st.push( 21 );
@@ -21,22 +20,28 @@ int main() {
 
 	std::cout << __FUNCSIG__ << '\n';
 
+	// iterator test
 	for (auto iter = st.begin(); iter != st.end(); ++iter)
 		std::cout << iter->value << '\n';
 
 	std::cout << "\n\n";
 
+	// pop and top test
 	while ( !st.is_empty() ) {
 		std::cout << st.top() << '\n';
 		st.pop();
 	}
 
+	// resize test
 	std::cout << '\n';
-	for (int i = 1; i < 101; i++)
+	for (int i = 1; i < 51; i++)
 		st.push( i * 2 );
 
-	for (auto iter = st.begin(); iter != st.end(); ++iter)
-		std::cout << iter->value << '\n';
+	// foreach test
+	for ( auto val : st )
+		std::cout << val.value << '\n';
+
+
 
 	std::cin.get();
 	return 0;
