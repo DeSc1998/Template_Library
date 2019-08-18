@@ -1,9 +1,6 @@
 
 #pragma once
 
-#include <memory>
-
-#include "../Nodes/node.h"
 #include "data_manager.h"
 
 namespace ds {
@@ -21,8 +18,11 @@ namespace ds {
 		using iterator = typename Manager::iterator;
 
 	private:
-		size_t current_size = 10, num_elements = 0;
+		size_t num_elements = 0;
 		Manager data;
+
+		// OLD IMPLEMENTATION
+		//size_t current_size = 10;
 		//node_type* head = nullptr;
 		//std::unique_ptr<node_type[]> elements = std::make_unique<node_type[]>( current_size );
 
@@ -30,6 +30,7 @@ namespace ds {
 		stack() = default;
 
 		stack( const Type& t ) {
+			// OLD IMPLEMENTATION
 			//elements[0].value = t;
 			//head = &elements[0];
 			data.insert( t );
@@ -37,6 +38,7 @@ namespace ds {
 		}
 
 		stack( stack&& st ) {
+			// OLD IMPLEMENTATION
 			//head = st.head;
 			//st.head = nullptr;
 			//elements = std::move( st.elements );
@@ -50,7 +52,7 @@ namespace ds {
 
 
 		void push( const Type& t ) {
-			// OLD IMPLEMINTATION
+			// OLD IMPLEMENTATION
 			//if ( num_elements < current_size ) {
 			//
 			//	// finde freien Platz
@@ -89,6 +91,7 @@ namespace ds {
 		}
 
 		const Type& top() const {
+			// OLD IMPLEMENTATION
 			//if ( head != nullptr )
 			//	return head->value;
 			//else
@@ -97,6 +100,7 @@ namespace ds {
 		}
 
 		void pop() {
+			// OLD IMPLEMENTATION
 			//if ( head != nullptr ) {
 			//	node_type* new_head = head->next;
 			//	*head = node_type();
@@ -112,21 +116,25 @@ namespace ds {
 		}
 
 		iterator begin() const {
+			// OLD IMPLEMENTATION
 			//return iterator( head );
 			return data.begin();
 		}
 
 		iterator end() const {
+			// OLD IMPLEMENTATION
 			//return iterator();
 			return data.end();
 		}
 
 		iterator begin() {
+			// OLD IMPLEMENTATION
 			//return iterator( head );
 			return data.begin();
 		}
 
 		iterator end() {
+			// OLD IMPLEMENTATION
 			//return iterator();
 			return data.end();
 		}
