@@ -4,7 +4,7 @@
 #include <functional>
 #include <memory>
 
-#include "Nodes/node.h"
+#include "../Nodes/node.h"
 
 
 namespace ds {

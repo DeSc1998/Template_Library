@@ -30,23 +30,8 @@
     <ClInclude Include="Typelist.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="World.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="Vector\vector.h">
       <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="binarytree.h">
-      <Filter>Headerdateien\container</Filter>
-    </ClInclude>
-    <ClInclude Include="list.h">
-      <Filter>Headerdateien\container</Filter>
-    </ClInclude>
-    <ClInclude Include="mono_list.h">
-      <Filter>Headerdateien\container</Filter>
-    </ClInclude>
-    <ClInclude Include="stack.h">
-      <Filter>Headerdateien\container</Filter>
     </ClInclude>
     <ClInclude Include="Nodes\duo_node.h">
       <Filter>Headerdateien\nodes</Filter>
@@ -60,8 +45,20 @@
     <ClInclude Include="Types.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="data_manager.h">
+    <ClInclude Include="container\binarytree.h">
+      <Filter>Headerdateien\container</Filter>
+    </ClInclude>
+    <ClInclude Include="container\data_manager.h">
       <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="container\list.h">
+      <Filter>Headerdateien\container</Filter>
+    </ClInclude>
+    <ClInclude Include="container\mono_list.h">
+      <Filter>Headerdateien\container</Filter>
+    </ClInclude>
+    <ClInclude Include="container\stack.h">
+      <Filter>Headerdateien\container</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

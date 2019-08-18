@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "Nodes/node.h"
+#include "../Nodes/node.h"
 #include "data_manager.h"
 
 namespace ds {

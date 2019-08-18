@@ -127,20 +127,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="binarytree.h" />
-    <ClInclude Include="data_manager.h" />
+    <ClInclude Include="container\binarytree.h" />
+    <ClInclude Include="container\data_manager.h" />
     <ClInclude Include="floatingpoint.h" />
     <ClInclude Include="integer.h" />
-    <ClInclude Include="list.h" />
-    <ClInclude Include="mono_list.h" />
+    <ClInclude Include="container\list.h" />
+    <ClInclude Include="container\mono_list.h" />
     <ClInclude Include="Nodes\duo_node.h" />
     <ClInclude Include="Nodes\mono_node.h" />
     <ClInclude Include="Nodes\node.h" />
-    <ClInclude Include="stack.h" />
+    <ClInclude Include="container\stack.h" />
     <ClInclude Include="Typelist.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Vector\vector.h" />
-    <ClInclude Include="World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

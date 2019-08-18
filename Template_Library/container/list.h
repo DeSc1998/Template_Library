@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Nodes/node.h"
+#include "../Nodes/node.h"
 
 #include <iterator>
 
