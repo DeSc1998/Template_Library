@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClInclude Include="container\binarytree.h" />
     <ClInclude Include="container\data_manager.h" />
+    <ClInclude Include="container\tuple.h" />
     <ClInclude Include="floatingpoint.h" />
     <ClInclude Include="integer.h" />
     <ClInclude Include="container\list.h" />

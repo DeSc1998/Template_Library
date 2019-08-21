@@ -60,5 +60,8 @@
     <ClInclude Include="container\stack.h">
       <Filter>Headerdateien\container</Filter>
     </ClInclude>
+    <ClInclude Include="container\tuple.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

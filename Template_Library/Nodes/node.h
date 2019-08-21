@@ -74,12 +74,12 @@ namespace ds {
 				}
 
 
-				value_type& operator * () {
-					return ptr->value;
+				node_type& operator * () {
+					return *ptr;
 				}
 
-				const value_type& operator * () const {
-					return ptr->value;
+				const node_type& operator * () const {
+					return *ptr;
 				}
 
 				node_type* operator -> () {
@@ -133,10 +133,16 @@ namespace ds {
 			traverse_iterator( node_type* ptr ) : iterator_base_type( ptr ) {}
 
 			traverse_iterator( const traverse_iterator& iter ) :
-				iterator_base_type( reinterpret_cast<iterator_base_type&>(iter) ) {}
+				iterator_base_type( reinterpret_cast<const iterator_base_type&>(iter) ) {}
 
 			traverse_iterator( traverse_iterator&& iter ) : 
 				iterator_base_type( reinterpret_cast<iterator_base_type&&>(iter) ) {}
+
+
+			traverse_iterator& operator = ( const traverse_iterator& iter ) {
+				this->ptr = iter.ptr;
+				return *this;
+			}
 
 
 			iterator_base_type& operator ++ () override {
@@ -163,10 +169,16 @@ namespace ds {
 			bi_traverse_iterator( node_type* ptr ) : iterator_base_type(ptr) {}
 
 			bi_traverse_iterator( const bi_traverse_iterator& iter ) :
-				iterator_base_type( reinterpret_cast<iterator_base_type&>(iter) ) {}
+				iterator_base_type( reinterpret_cast<const iterator_base_type&>(iter) ) {}
 
 			bi_traverse_iterator( bi_traverse_iterator&& iter ) :
 				iterator_base_type( reinterpret_cast<iterator_base_type&&>(iter) ) {}
+
+
+			bi_traverse_iterator& operator = (const bi_traverse_iterator& iter) {
+				this->ptr = iter.ptr;
+				return *this;
+			}
 
 
 			iterator_base_type& operator ++ () {
