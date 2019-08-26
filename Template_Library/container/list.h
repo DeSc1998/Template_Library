@@ -15,102 +15,106 @@ namespace ds {
 	class list {
 	public:
 
-		using node_type = duo_node<Type>;
-		//using node_type = Manager::node_type;
+		//using node_type = duo_node<Type>;
+		using value_type = typename Manager::value_type;
+		using node_type = typename Manager::node_type;
 		
-		using iterator = iterators::bi_traverse_iterator<Type>;
-		//using iterator = Manager::iterator;
+		//using iterator = iterators::bi_traverse_iterator<Type>;
+		using iterator = typename Manager::iterator;
 
 	private:
 
-		size_t num_elements = 0, size = 10;
-		//Manager data;
-		std::unique_ptr<node_type[]> elements = std::make_unique<node_type[]>( size );
-		iterator _begin;
+		size_t num_elements = 0;
+		Manager data;
+		//std::unique_ptr<node_type[]> elements = std::make_unique<node_type[]>( size );
+		//iterator _begin;
 		
 
-		static void init( std::unique_ptr<node_type[]>& ptr, size_t size, node_type _default = node_type() ) {
-			for ( size_t i = 0; i < size; i++ ) {
-				ptr[i] = _default;
-			}
-		}
-
-		static void link_nodes( node_type& first, node_type& second ) {
-			first.next = &second;
-			second.prev = &first;
-		}
+		//static void init( std::unique_ptr<node_type[]>& ptr, size_t size, node_type _default = node_type() ) {
+		//	for ( size_t i = 0; i < size; i++ ) {
+		//		ptr[i] = _default;
+		//	}
+		//}
+		//
+		//static void link_nodes( node_type& first, node_type& second ) {
+		//	first.next = &second;
+		//	second.prev = &first;
+		//}
 
 	public:
-		list() {
-			init( elements, size );
-		}
+		list() = default;
 
 		list( const Type& t ) {
-			init( elements, size );
-			elements[0].value = t;
-			_begin = iterator( &elements[0] );
+			//init( elements, size );
+			//elements[0].value = t;
+			//_begin = iterator( &elements[0] );
+			data.insert(t);
 			num_elements++;
 		}
 
 
 		// Listenoperatotionen
 		void insert( const Type& t ) {
-			bool inserted = false;
-			for ( size_t i = 0; i < size; i++ ) {
-				if ( elements[i] == node_type() ) {
-					elements[i].value = t;
-					inserted = true;
-					link_nodes( *end(), elements[i] );
-					break;
-				}
-			}
-
-			if ( !inserted ) {
-				resize( size + 10 );
-				elements[size - 10].value = t;
-				link_nodes( *_end, elements[size - 10] );
-				++_end;
-			}
+			//bool inserted = false;
+			//for ( size_t i = 0; i < size; i++ ) {
+			//	if ( elements[i] == node_type() ) {
+			//		elements[i].value = t;
+			//		inserted = true;
+			//		link_nodes( *end(), elements[i] );
+			//		break;
+			//	}
+			//}
+			//
+			//if ( !inserted ) {
+			//	resize( size + 10 );
+			//	elements[size - 10].value = t;
+			//	link_nodes( *_end, elements[size - 10] );
+			//	++_end;
+			//}
+			data.insert(t);
 
 			num_elements++;
 		}
 
 		void insert( const Type& t, size_t index ) {
-			auto iter = begin();
-
-			while (index > 0) {
-				++iter;
-				--index;
-			}
-
-			insert( t, iter );
+			//auto iter = begin();
+			//
+			//while (index > 0) {
+			//	++iter;
+			//	--index;
+			//}
+			//
+			//insert( t, iter );
+			data.insert(t, index);
+			++num_elements;
 		}
 
 		void insert( const Type& t, iterator iter ) {
-			bool inserted = false;
-			iterator iter_2 = iter;
-			--iter_2;
-			node_type* n = &elements[0];
-
-			for ( size_t i = 0; i < size; i++ ) {
-				if (*n == node_type()) {
-					n->value = t;
-					inserted = true;
-					break;
-				}
-				++n;
-			}
-			
-			if ( !inserted ) {
-				resize( size + 10 );
-				n = &elements[0];
-				n += size - 10;
-				n->value = t;
-			}
-
-			// [ ..., iter_2, n, iter, ... ]
-			link_nodes( *iter_2, *n );
-			link_nodes( *n, *iter );
+			//bool inserted = false;
+			//iterator iter_2 = iter;
+			//--iter_2;
+			//node_type* n = &elements[0];
+			//
+			//for ( size_t i = 0; i < size; i++ ) {
+			//	if (*n == node_type()) {
+			//		n->value = t;
+			//		inserted = true;
+			//		break;
+			//	}
+			//	++n;
+			//}
+			//
+			//if ( !inserted ) {
+			//	resize( size + 10 );
+			//	n = &elements[0];
+			//	n += size - 10;
+			//	n->value = t;
+			//}
+			//
+			//// [ ..., iter_2, n, iter, ... ]
+			//link_nodes( *iter_2, *n );
+			//link_nodes( *n, *iter );
+			data.insert(t, iter);
 
 			++num_elements;
 		}

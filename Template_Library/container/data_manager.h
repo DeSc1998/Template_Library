@@ -4,6 +4,59 @@
 
 namespace ds {
 
+	template < typename Type >
+	class block {
+		static constexpr size_t _size = 1024 * 2;
+	public:
+		static constexpr size_t num_elem = _size / sizeof(Type);
+		static constexpr size_t size = num_elem * sizeof(Type);
+
+		struct Index { size_t block_index = 0, index = 0; };
+
+		using value_type = Type;
+		using pointer = Type *;
+	private:
+		pointer data = nullptr;
+
+	public:
+		block() = default;
+
+		block( nullptr_t ) : data( new value_type[num_elem] ) {}
+
+		block( block&& b ) : data(b.data) {
+			b.data = nullptr;
+		}
+
+		block& operator = ( block&& b ) {
+			delete[] data;
+			data = b.data;
+			b.data = nullptr;
+		}
+
+		block(const block&) = delete;
+		block& operator = (const block&) = delete;
+		
+
+		static Index parse_index( size_t index ) {
+			return Index{ index / num_elem, index % num_elem };
+		}
+
+		value_type& operator [] ( size_t index ) {
+			return index < num_elem ? data[index] : value_type();
+		}
+
+		const value_type& operator [] ( size_t index ) const {
+			return index < num_elem ? data[index] : value_type();
+		}
+
+
+		~block() {
+			if ( data != nullptr )
+				delete[] data;
+		}
+	};
+
+
 	template < typename T, typename Node = void >
 	class data_manager {
 	public:
@@ -286,6 +339,22 @@ namespace ds {
 		data_manager& operator = (const data_manager&) = delete;
 
 
+		void insert( const value_type& val, size_t index ) {
+			iterator iter = begin();
+			for (; index > 0; index-- )
+				iter++;
+
+			insert( val, iter );
+		}
+
+		void insert( value_type&& val, size_t index ) {
+			iterator iter = begin();
+			for (; index > 0; index--)
+				iter++;
+
+			insert( std::forward<value_type>(val), iter );
+		}
+
 		void insert( const value_type& val, iterator pos ) {
 			size_t index = find_space();
 			if (index != _size)
@@ -340,6 +409,13 @@ namespace ds {
 			--prev; ++next;
 			link_nodes( *prev, *next );
 			*iter = node_type();
+		}
+
+		void erase( iterator pos ) {
+			iterator prev = pos, next = pos;
+			--prev; ++next;
+			link_nodes( *prev, *next );
+			*pos = node_type();
 		}
 
 
