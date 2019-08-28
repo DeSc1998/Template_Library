@@ -4,24 +4,26 @@
 
 namespace ds {
 
-	template < typename Type >
+	template < typename Type, size_t Block_size = 0x800 >
 	class block {
-		static constexpr size_t _size = 1024 * 2;
 	public:
-		static constexpr size_t num_elem = _size / sizeof(Type);
-		static constexpr size_t size = num_elem * sizeof(Type);
-
-		struct Index { size_t block_index = 0, index = 0; };
+		struct Index { size_t block_index = 0, value_index = 0; };
 
 		using value_type = Type;
 		using pointer = Type *;
+
+		static constexpr size_t num_elem = Block_size / sizeof(value_type);
+		static constexpr size_t size = num_elem * sizeof(value_type);
 	private:
 		pointer data = nullptr;
 
 	public:
 		block() = default;
 
-		block( nullptr_t ) : data( new value_type[num_elem] ) {}
+		block( const value_type& val ) : data( new value_type[num_elem] ) {
+			for ( size_t i = 0; i < num_elem; i++ )
+				data[i] = val;
+		}
 
 		block( block&& b ) : data(b.data) {
 			b.data = nullptr;
@@ -317,7 +319,7 @@ namespace ds {
 
 	public:
 
-		data_manager() : _size(10), ptr( new node_type[_size] ) {
+		data_manager() : _size(10), ptr( new node_type[_size] ), _begin(&ptr[0]) {
 			init( ptr, _size );
 		}
 
@@ -366,8 +368,13 @@ namespace ds {
 
 			iterator prev = pos;
 			--prev;
-			link_nodes( *prev, ptr[index] );
+			link_nodes( prev, iterator(&ptr[index]) );
 			link_nodes( ptr[index], *pos );
+
+			if ( pos == begin() ) {
+				_begin = iterator(&ptr[index]);
+				_begin->prev = nullptr;
+			}
 		}
 
 		void insert( value_type&& val, iterator pos ) {
@@ -381,8 +388,13 @@ namespace ds {
 
 			iterator prev = pos;
 			--prev;
-			link_nodes( *prev, ptr[index] );
+			link_nodes( prev, iterator(&ptr[index]) );
 			link_nodes( ptr[index], *pos );
+
+			if ( pos == begin() ) {
+				_begin = iterator(&ptr[index]);
+				_begin->prev = nullptr;
+			}
 		}
 
 		value_type& at( size_t index ) {
@@ -402,22 +414,31 @@ namespace ds {
 		void erase( const value_type& val ) {
 			iterator iter = begin();
 			for (; iter != end(); iter++ )
-				if ( (*iter).value == val )
+				if ( iter->value == val )
 					break;
-			
-			iterator prev = iter, next = iter;
-			--prev; ++next;
-			link_nodes( *prev, *next );
-			*iter = node_type();
+
+			erase( iter );
 		}
 
 		void erase( iterator pos ) {
-			iterator prev = pos, next = pos;
-			--prev; ++next;
-			link_nodes( *prev, *next );
-			*pos = node_type();
+			if ( pos.get() != nullptr ) {
+				iterator prev = pos, next = pos;
+				--prev; ++next;
+				link_nodes(prev, next);
+				*pos = node_type();
+			}
 		}
 
+
+		static void check_linkage( node_type* ptr, size_t size ) {
+			for ( size_t i = 0; i < size; i++ ) {
+				if (ptr[i].next == &ptr[i])
+					ptr[i].next = nullptr;
+
+				if ( ptr[i].prev == &ptr[i] )
+					ptr[i].prev = nullptr;
+			}
+		}
 
 		static void init( node_type* ptr, size_t size ) {
 			for (size_t i = 0; i < size; i++)
@@ -430,7 +451,7 @@ namespace ds {
 			iterator iter = begin();
 
 			for (size_t i = 0; i < new_size && iter != end(); i++) {
-				tmp[i].value = std::move( (*iter).value );
+				tmp[i].value = std::move( iter->value );
 				if (i != 0)
 					link_nodes( tmp[i-1], tmp[i] );
 
@@ -448,8 +469,13 @@ namespace ds {
 			n2.prev = &n1;
 		}
 
+		static void link_nodes( iterator prev, iterator next ) {
+			if ( prev.get() != nullptr && next.get() != nullptr )
+				link_nodes( *prev, *next );
+		}
+
 		size_t find_space() const {
-			for (size_t i = 0; i < size; i++) {
+			for (size_t i = 0; i < _size; i++) {
 				if (ptr[i] == node_type())
 					return i;
 			}
@@ -460,10 +486,12 @@ namespace ds {
 		size_t size() const { return _size; }
 
 		iterator begin() const {
+			check_linkage(ptr, _size);
 			return iterator(_begin);
 		}
 
 		iterator begin() {
+			check_linkage(ptr, _size);
 			return iterator(_begin);
 		}
 
