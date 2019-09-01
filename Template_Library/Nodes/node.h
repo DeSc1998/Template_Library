@@ -46,13 +46,13 @@ namespace ds {
 		// iterator base for node based containers
 		template <
 			typename Type,
-			typename Node_Type,
-			typename = std::enable_if_t< is_node_v<Node_Type> >
+			typename Node,
+			typename = std::enable_if_t< is_node_v<Node> >
 		>
 			class iterator_base {
 			public:
 				using value_type = Type;
-				using node_type = Node_Type;
+				using node_type = Node;
 
 			protected:
 				node_type* ptr = nullptr;
@@ -146,12 +146,14 @@ namespace ds {
 
 
 			iterator_base_type& operator ++ () override {
-				this->ptr = this->ptr->next;
+				if (this->ptr != nullptr)
+					this->ptr = this->ptr->next;
 				return *this;
 			}
 
 			iterator_base_type& operator ++ (int) override {
-				this->ptr = this->ptr->next;
+				if (this->ptr != nullptr)
+					this->ptr = this->ptr->next;
 				return *this;
 			}
 		};
@@ -182,22 +184,26 @@ namespace ds {
 
 
 			iterator_base_type& operator ++ () {
-				this->ptr = this->ptr->next;
+				if ( this->ptr != nullptr )
+					this->ptr = this->ptr->next;
 				return *this;
 			}
 
 			iterator_base_type& operator ++ (int) {
-				this->ptr = this->ptr->next;
+				if (this->ptr != nullptr)
+					this->ptr = this->ptr->next;
 				return *this;
 			}
 
 			iterator_base_type& operator -- () {
-				this->ptr = this->ptr->prev;
+				if (this->ptr != nullptr)
+					this->ptr = this->ptr->prev;
 				return *this;
 			}
 
 			iterator_base_type& operator -- (int) {
-				this->ptr = this->ptr->prev;
+				if (this->ptr != nullptr)
+					this->ptr = this->ptr->prev;
 				return *this;
 			}
 		};

@@ -10,7 +10,7 @@ namespace ds {
 	class duo_node {
 	public:
 		Type value{};
-		duo_node* prev = nullptr, next = nullptr;
+		duo_node *prev = nullptr, *next = nullptr;
 
 
 		duo_node() = default;

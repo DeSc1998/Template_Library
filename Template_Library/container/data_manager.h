@@ -4,6 +4,61 @@
 
 namespace ds {
 
+	template < typename Type, size_t Block_size = 0x800 >
+	class block {
+	public:
+		struct Index { size_t block_index = 0, value_index = 0; };
+
+		using value_type = Type;
+		using pointer = Type *;
+
+		static constexpr size_t num_elem = Block_size / sizeof(value_type);
+		static constexpr size_t size = num_elem * sizeof(value_type);
+	private:
+		pointer data = nullptr;
+
+	public:
+		block() = default;
+
+		block( const value_type& val ) : data( new value_type[num_elem] ) {
+			for ( size_t i = 0; i < num_elem; i++ )
+				data[i] = val;
+		}
+
+		block( block&& b ) : data(b.data) {
+			b.data = nullptr;
+		}
+
+		block& operator = ( block&& b ) {
+			delete[] data;
+			data = b.data;
+			b.data = nullptr;
+		}
+
+		block(const block&) = delete;
+		block& operator = (const block&) = delete;
+		
+
+		static Index parse_index( size_t index ) {
+			return Index{ index / num_elem, index % num_elem };
+		}
+
+		value_type& operator [] ( size_t index ) {
+			return index < num_elem ? data[index] : value_type();
+		}
+
+		const value_type& operator [] ( size_t index ) const {
+			return index < num_elem ? data[index] : value_type();
+		}
+
+
+		~block() {
+			if ( data != nullptr )
+				delete[] data;
+		}
+	};
+
+
 	template < typename T, typename Node = void >
 	class data_manager {
 	public:
@@ -13,23 +68,23 @@ namespace ds {
 		using iterator = pointer;
 	private:
 		size_t _size = 10;
-		pointer ptr = new value_type[size];
+		pointer elems = new value_type[size];
 
 	public:
 
-		data_manager() : _size(10), ptr( new value_type[_size] ) {
-			init( ptr, _size );
+		data_manager() : _size(10), elems( new value_type[_size] ) {
+			init( elems, _size );
 		}
 
-		data_manager( data_manager&& dm ) : _size(dm.size), ptr(dm.ptr) {
-			dm.ptr = nullptr;
+		data_manager( data_manager&& dm ) : _size(dm.size), elems(dm.elems) {
+			dm.elems = nullptr;
 		}
 
 		data_manager& operator = ( data_manager&& dm ) {
 			_size = dm.size;
-			delete[] ptr;
-			ptr = dm.ptr;
-			dm.ptr = nullptr;
+			delete[] elems;
+			elems = dm.elems;
+			dm.elems = nullptr;
 			return *this;
 		}
 
@@ -40,33 +95,33 @@ namespace ds {
 		void insert( const value_type& val ) {
 			size_t index = find_space();
 			if (index != _size)
-				ptr[index] = val;
+				elems[index] = val;
 			else {
 				resize(_size + 10);
-				ptr[index] = val;
+				elems[index] = val;
 			}
 		}
 
 		void insert( value_type&& val ) {
 			size_t index = find_space();
 			if (index != _size)
-				ptr[index] = std::move(val);
+				elems[index] = std::move(val);
 			else {
 				resize(_size + 10);
-				ptr[index] = std::move(val);
+				elems[index] = std::move(val);
 			}
 		}
 
 		value_type& operator [] ( size_t index ) {
 			if (index < _size)
-				return ptr[index];
+				return elems[index];
 			else
 				return ;
 		}
 
 		const value_type& operator [] ( size_t index ) const {
 			if (index < _size)
-				return ptr[index];
+				return elems[index];
 			else
 				return ;
 		}
@@ -88,13 +143,13 @@ namespace ds {
 			}
 
 			_size = new_size;
-			delete[] ptr;
-			ptr = tmp;
+			delete[] elems;
+			elems = tmp;
 		}
 
 		size_t find_space() const {
 			for (size_t i = 0; i < size; i++) {
-				if (ptr[i] == value_type())
+				if (elems[i] == value_type())
 					return i;
 			}
 
@@ -104,23 +159,23 @@ namespace ds {
 		size_t size() const { return _size; }
 
 		iterator begin() const {
-			return iterator( &ptr[0] );
+			return iterator( &elems[0] );
 		}
 
 		iterator begin() {
-			return iterator(&ptr[0]);
+			return iterator(&elems[0]);
 		}
 
 		iterator end() const {
-			return iterator( ++(&ptr[_size-1]) );
+			return iterator( ++(&elems[_size-1]) );
 		}
 
 		iterator end() {
-			return iterator(++(&ptr[_size - 1]));
+			return iterator(++(&elems[_size - 1]));
 		}
 
 		~data_manager() {
-			delete[] ptr;
+			delete[] elems;
 		}
 	};
 
@@ -133,26 +188,26 @@ namespace ds {
 		using iterator = iterators::traverse_iterator<T>;
 	private:
 		size_t _size = 10;
-		node_type* ptr = nullptr;
+		node_type* elems = nullptr;
 		iterator _begin;
 
 	public:
 
-		data_manager() : _size(10), ptr( new node_type[_size] ) {
-			init( ptr, _size );
+		data_manager() : _size(10), elems( new node_type[_size] ) {
+			init( elems, _size );
 		}
 
-		data_manager( data_manager&& dm ) : ptr( dm.ptr ) {
+		data_manager( data_manager&& dm ) : elems( dm.elems ) {
 			_size = dm._size;
-			dm.ptr = nullptr;
+			dm.elems = nullptr;
 			_begin = dm._begin;
 		}
 
 		data_manager& operator = ( data_manager&& dm ) {
 			_size = dm._size;
-			delete[] ptr;
-			ptr = dm.ptr;
-			dm.ptr = nullptr;
+			delete[] elems;
+			elems = dm.elems;
+			dm.elems = nullptr;
 			_begin = dm._begin;
 			return *this;
 		}
@@ -164,28 +219,28 @@ namespace ds {
 		void insert( const value_type& val ) {
 			size_t index = find_space();
 			if (index != _size) {
-				ptr[index].value = val;
+				elems[index].value = val;
 			}
 			else {
 				resize(_size + 10);
-				ptr[index].value = val;
+				elems[index].value = val;
 			}
 
-			ptr[index].next = _begin.get();
-			_begin = iterator( &ptr[index] );
+			elems[index].next = _begin.get();
+			_begin = iterator( &elems[index] );
 		}
 
 		void insert( value_type&& val ) {
 			size_t index = find_space();
 			if ( index != _size )
-				ptr[index].value = std::move(val);
+				elems[index].value = std::move(val);
 			else {
 				resize( _size + 10 );
-				ptr[index].value = std::move(val);
+				elems[index].value = std::move(val);
 			}
 
-			ptr[index].next = _begin.get();
-			_begin = iterator( &ptr[index] );
+			elems[index].next = _begin.get();
+			_begin = iterator( &elems[index] );
 		}
 
 		value_type& top() {
@@ -221,14 +276,14 @@ namespace ds {
 			}
 
 			_size = new_size;
-			delete[] ptr;
-			ptr = tmp;
+			delete[] elems;
+			elems = tmp;
 			_begin = iterator( &tmp[0] );
 		}
 
 		size_t find_space() const {
 			for (size_t i = 0; i < _size; i++) {
-				if (ptr[i] == node_type())
+				if (elems[i] == node_type())
 					return i;
 			}
 
@@ -246,7 +301,7 @@ namespace ds {
 		}
 
 		~data_manager() {
-			delete[] ptr;
+			delete[] elems;
 		}
 	};
 
@@ -259,25 +314,25 @@ namespace ds {
 		using iterator = iterators::bi_traverse_iterator<T>;
 	private:
 		size_t _size = 10;
-		node_type* ptr = nullptr;
+		node_type* elems = nullptr;
 		iterator _begin;
 
 	public:
 
-		data_manager() : _size(10), ptr( new node_type[_size] ) {
-			init( ptr, _size );
+		data_manager() : _size(10), elems( new node_type[_size] ), _begin(&elems[0]) {
+			init( elems, _size );
 		}
 
-		data_manager( data_manager&& dm ) : _size(dm.size), ptr(dm.ptr) {
-			dm.ptr = nullptr;
+		data_manager( data_manager&& dm ) : _size(dm.size), elems(dm.elems) {
+			dm.elems = nullptr;
 			_begin = dm._begin;
 		}
 
 		data_manager& operator = (data_manager&& dm) {
 			_size = dm.size;
-			delete[] ptr;
-			ptr = dm.ptr;
-			dm.ptr = nullptr;
+			delete[] elems;
+			elems = dm.elems;
+			dm.elems = nullptr;
 			_begin = dm._begin;
 			return *this;
 		}
@@ -286,62 +341,123 @@ namespace ds {
 		data_manager& operator = (const data_manager&) = delete;
 
 
+		void insert( const value_type& val, size_t index ) {
+			if (index >= _size)
+				resize( _size + 10 );
+
+			iterator iter = begin();
+			for (; index > 0; index-- )
+				iter++;
+
+			insert( val, iter );
+		}
+
+		void insert( value_type&& val, size_t index ) {
+			if (index >= _size)
+				resize( _size + 10 );
+
+			iterator iter = begin();
+			for (; index > 0; index--)
+				iter++;
+
+			insert( std::forward<value_type>(val), iter );
+		}
+
 		void insert( const value_type& val, iterator pos ) {
 			size_t index = find_space();
-			if (index != _size)
-				ptr[index].value = val;
-			else {
-				resize( _size + 10 );
-				ptr[index].value = val;
+			if (index == _size) {
+				size_t iter_index = 0;
+				while (pos != _begin) { iter_index++; pos--; }
+				resize(_size + 10);
+				pos = iterator(&elems[iter_index]);
 			}
 
-			iterator prev = pos;
-			--prev;
-			link_nodes( *prev, ptr[index] );
-			link_nodes( ptr[index], *pos );
+			if ( *_begin != node_type() && pos != _begin ) {
+				iterator prev = pos;
+				--prev;
+				link_nodes(prev, iterator(&elems[index]));
+				link_nodes( iterator(&elems[index]), *pos);
+			} else if ( *_begin != node_type() && pos == _begin ) {
+				link_nodes(elems[index], *pos);
+				_begin = iterator(&elems[index]);
+				_begin->prev = nullptr;
+			}
+
+			elems[index].value = val;
 		}
 
 		void insert( value_type&& val, iterator pos ) {
 			size_t index = find_space();
-			if (index != _size)
-				ptr[index].value = std::move(val);
-			else {
+			if (index == _size) {
+				size_t iter_index = 0;
+				while (pos != _begin) { iter_index++; pos--; }
 				resize(_size + 10);
-				ptr[index].value = std::move(val);
+				pos = iterator(&elems[iter_index]);
 			}
 
-			iterator prev = pos;
-			--prev;
-			link_nodes( *prev, ptr[index] );
-			link_nodes( ptr[index], *pos );
+			if ( *_begin != node_type() && pos != _begin ) {
+				iterator prev = pos;
+				--prev;
+				link_nodes( prev, iterator(&elems[index]) );
+				link_nodes( iterator(&elems[index]), pos );
+			} else if ( pos == _begin && *_begin != node_type() ) {
+				link_nodes( elems[index], *pos );
+				_begin = iterator(&elems[index]);
+				_begin->prev = nullptr;
+			}
+
+			elems[index].value = std::move(val);
 		}
 
 		value_type& at( size_t index ) {
 			iterator iter = _begin;
-			for (size_t i = 0; i <= index && iter != end(); i++)
+			for (size_t i = 0; i < index && iter != end(); i++)
 				++iter;
-			return *(--iter);
+			return iter.get() != nullptr ? iter->value : value_type();
 		}
 
 		const value_type& at( size_t index ) const {
 			iterator iter = _begin;
-			for (size_t i = 0; i <= index && iter != end(); i++)
+			for (size_t i = 0; i < index && iter != end(); i++)
 				++iter;
-			return *(--iter);
+			return iter.get() != nullptr ? iter->value : value_type();
 		}
 
-		void erase( const value_type& val ) {
+		bool erase( const value_type& val ) {
 			iterator iter = begin();
 			for (; iter != end(); iter++ )
-				if ( (*iter).value == val )
+				if ( iter->value == val )
 					break;
-			
-			iterator prev = iter, next = iter;
-			--prev; ++next;
-			link_nodes( *prev, *next );
-			*iter = node_type();
+
+			return erase( iter );
 		}
 
+		bool erase( iterator pos ) {
+			if ( pos.get() != nullptr ) {
+				iterator prev = pos, next = pos;
+				--prev; ++next;
+				if ( !link_nodes(prev, next) && prev.get() == nullptr )
+					_begin = next;
+				*pos = node_type();
+				return true;
+			}
+			return false;
+		}
+
+
+		static void check_linkage( node_type* node, size_t size ) {
+			for (size_t i = 0; i < size; i++) {
+				if ( node[i].next == &node[i] )
+					node[i].next = nullptr;
+
+				if ( node[i].prev == &node[i] )
+					node[i].prev = nullptr;
+			}
+		}
+
+		bool is_in_bound( node_type* node ) const {
+			return node >= elems && node < elems + _size;
+		}
 
 		static void init( node_type* ptr, size_t size ) {
 			for (size_t i = 0; i < size; i++)
@@ -354,7 +470,7 @@ namespace ds {
 			iterator iter = begin();
 
 			for (size_t i = 0; i < new_size && iter != end(); i++) {
-				tmp[i].value = std::move( (*iter).value );
+				tmp[i].value = std::move( iter->value );
 				if (i != 0)
 					link_nodes( tmp[i-1], tmp[i] );
 
@@ -362,19 +478,28 @@ namespace ds {
 			}
 
 			_size = new_size;
-			delete[] ptr;
-			ptr = tmp;
+			delete[] elems;
+			elems = tmp;
 			_begin = iterator( &tmp[0] );
 		}
 
-		static void link_nodes( node_type& n1, node_type& n2 ) {
+		void link_nodes( node_type& n1, node_type& n2 ) {
 			n1.next = &n2;
 			n2.prev = &n1;
 		}
 
+		bool link_nodes( iterator prev, iterator next ) {
+			if ( is_in_bound(prev.get()) && is_in_bound(next.get()) ) {
+				prev->next = next.get();
+				next->prev = prev.get();
+				return true;
+			}
+			return false;
+		}
+
 		size_t find_space() const {
-			for (size_t i = 0; i < size; i++) {
-				if (ptr[i] == node_type())
+			for (size_t i = 0; i < _size; i++) {
+				if (elems[i] == node_type())
 					return i;
 			}
 
@@ -384,10 +509,12 @@ namespace ds {
 		size_t size() const { return _size; }
 
 		iterator begin() const {
+			//check_linkage(elems, _size);
 			return iterator(_begin);
 		}
 
 		iterator begin() {
+			//check_linkage(elems, _size);
 			return iterator(_begin);
 		}
 
@@ -400,7 +527,7 @@ namespace ds {
 		}
 
 		~data_manager() {
-			delete[] ptr;
+			delete[] elems;
 		}
 	};
 

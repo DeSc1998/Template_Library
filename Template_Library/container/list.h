@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <memory>
+#include <iostream>
 
 #include "../Nodes/node.h"
 #include "data_manager.h"
@@ -15,201 +15,114 @@ namespace ds {
 	class list {
 	public:
 
-		using node_type = duo_node<Type>;
-		//using node_type = Manager::node_type;
-		
-		using iterator = iterators::bi_traverse_iterator<Type>;
-		//using iterator = Manager::iterator;
+		using value_type = typename Manager::value_type;
+		using node_type = typename Manager::node_type;
+
+		using iterator = typename Manager::iterator;
 
 	private:
 
-		size_t num_elements = 0, size = 10;
-		//Manager data;
-		std::unique_ptr<node_type[]> elements = std::make_unique<node_type[]>( size );
-		iterator _begin;
-		
-
-		static void init( std::unique_ptr<node_type[]>& ptr, size_t size, node_type _default = node_type() ) {
-			for ( size_t i = 0; i < size; i++ ) {
-				ptr[i] = _default;
-			}
-		}
-
-		static void link_nodes( node_type& first, node_type& second ) {
-			first.next = &second;
-			second.prev = &first;
-		}
+		size_t num_elements = 0;
+		Manager data;
 
 	public:
-		list() {
-			init( elements, size );
-		}
+		list() = default;
 
-		list( const Type& t ) {
-			init( elements, size );
-			elements[0].value = t;
-			_begin = iterator( &elements[0] );
+		list(const value_type& t) {
+			data.insert(t);
 			num_elements++;
 		}
 
 
 		// Listenoperatotionen
-		void insert( const Type& t ) {
-			bool inserted = false;
-			for ( size_t i = 0; i < size; i++ ) {
-				if ( elements[i] == node_type() ) {
-					elements[i].value = t;
-					inserted = true;
-					link_nodes( *end(), elements[i] );
-					break;
-				}
-			}
-
-			if ( !inserted ) {
-				resize( size + 10 );
-				elements[size - 10].value = t;
-				link_nodes( *_end, elements[size - 10] );
-				++_end;
-			}
-
-			num_elements++;
+		void insert(const value_type& t, size_t index = 0) {
+			data.insert(t, index);
+			++num_elements;
 		}
 
-		void insert( const Type& t, size_t index ) {
-			auto iter = begin();
-
-			while (index > 0) {
-				++iter;
-				--index;
-			}
-
-			insert( t, iter );
-		}
-
-		void insert( const Type& t, iterator iter ) {
-			bool inserted = false;
-			iterator iter_2 = iter;
-			--iter_2;
-			node_type* n = &elements[0];
-
-			for ( size_t i = 0; i < size; i++ ) {
-				if (*n == node_type()) {
-					n->value = t;
-					inserted = true;
-					break;
-				}
-				++n;
-			}
-			
-			if ( !inserted ) {
-				resize( size + 10 );
-				n = &elements[0];
-				n += size - 10;
-				n->value = t;
-			}
-
-			// [ ..., iter_2, n, iter, ... ]
-			link_nodes( *iter_2, *n );
-			link_nodes( *n, *iter );
+		void insert(const value_type& t, iterator iter) {
+			data.insert(t, iter);
 
 			++num_elements;
 		}
 
-		void insert( Type&& t ) {
-			bool inserted = false;
-			for (size_t i = 0; i < size; i++) {
-				if (elements[i] == node_type()) {
-					elements[i].value = std::move(t);
-					inserted = true;
-					link_nodes(*end(), elements[i]);
-					break;
-				}
-			}
-
-			if (!inserted) {
-				resize(size + 10);
-				elements[size - 10].value = std::move(t);
-				link_nodes(*_end, elements[size - 10]);
-				++_end;
-			}
-
-			num_elements++;
+		void insert(value_type&& t, size_t index = 0) {
+			data.insert(std::forward<value_type>(t), index);
+			++num_elements;
 		}
 
-		void insert( Type&& t, size_t index ) {
-			auto iter = begin();
-
-			while (index > 0) {
-				++iter;
-				--index;
-			}
-
-			insert(std::forward<Type>(t), iter);
-		}
-
-		void insert( Type&& t, iterator iter ) {
-			bool inserted = false;
-			iterator iter_2 = iter;
-			--iter_2;
-			node_type* n = &elements[0];
-
-			for (size_t i = 0; i < size; i++) {
-				if (*n == node_type()) {
-					n->value = std::move(t);
-					inserted = true;
-					break;
-				}
-				++n;
-			}
-
-			if (!inserted) {
-				resize(size + 10);
-				n = &elements[0];
-				n += size - 10;
-				n->value = std::move(t);
-			}
-
-			// [ ..., iter_2, n, iter, ... ]
-			link_nodes(*iter_2, *n);
-			link_nodes(*n, *iter);
+		void insert(value_type&& val, iterator iter) {
+			data.insert(std::forward<value_type>(val), iter);
 
 			++num_elements;
 		}
 
-		void resize( size_t new_size ) {
-			std::unique_ptr<node_type[]> temp = std::make_unique<node_type[]>(new_size);
-			auto iter = begin();
+		value_type& operator [] (size_t index) {
+			return data.at(index);
+		}
 
-			init(temp, new_size);
+		const value_type& operator [] (size_t index) const {
+			return data.at(index);
+		}
 
-			for (size_t i = 0; i < new_size && iter != end(); i++) {
-				temp[i] = *iter;
-				++iter;
-				
-				if (i != 0)
-					link_nodes( temp[i-1], temp[i] );
-			}
+		void erase(const value_type& val) {
+			if ( data.erase(val) )
+				--num_elements;
+		}
 
-			_begin = iterator( &temp[0] );
+		void erase(iterator pos) {
+			if ( data.erase(pos) )
+				--num_elements;
+		}
 
-			size = new_size;
-			ptr = std::move( temp );
+		void resize(size_t new_size) {
+			data.resize(new_size);
 		}
 
 		bool is_empty() const {
 			return num_elements == 0;
 		}
 
+		size_t size() const {
+			return num_elements;
+		}
+
 
 		// Iteratoren
+		iterator begin() {
+			return data.begin();
+		}
+
 		iterator begin() const {
-			return _begin;
+			return data.begin();
+		}
+
+		iterator end() {
+			return data.end();
 		}
 
 		iterator end() const {
-			return iterator();
+			return data.end();
 		}
 	};
 
+	template < typename T >
+	std::ostream& operator << (std::ostream& out, const list<T>& l) {
+		auto iter = l.begin();
+
+		while ( iter != l.end() ) {
+			if (iter == l.begin())
+				out << '[';
+
+			out << iter->value;
+
+			if ( (iter++) == l.end() )
+				out << ']';
+			else
+				out << ", ";
+		}
+
+		return out;
+	}
 
 }
