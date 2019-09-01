@@ -66,6 +66,7 @@ void list_test() {
 	for ( auto iter = list.begin(); iter != list.end(); ++iter ) {
 		std::cout << iter->value << ", ";
 	}
+	std::cout << '\n' << list.size() << '\n';
 
 	// erase test (passed)
 	list.erase( 0 );
@@ -73,18 +74,23 @@ void list_test() {
 	list.erase( 15 );
 
 	// 2nd iterator test (passed)
-	std::cout << "\n\n";
+	std::cout << '\n';
 	for (auto iter = list.begin(); iter != list.end(); ++iter) {
 		std::cout << iter->value << ", ";
 	}
+	std::cout << '\n' << list.size() << '\n';
 
-	// resize test (failed: unknown cause)
+	// resize test (passed)
 	//( inserting more elements than the default size )
 	for (int i = 0; i < 51; i++)
 		list.insert( i*2 );
 
-	// foreach test (unknown)
-	std::cout << "\n\n";
+	// foreach test (passed)
+	std::cout << '\n';
 	for (auto node : list)
 		std::cout << node.value << ", ";
+
+	std::cout << '\n' << list.size() << '\n' << '\n';
+
+	std::cout << list;
 }
