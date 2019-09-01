@@ -130,6 +130,7 @@
     <ClInclude Include="container\binarytree.h" />
     <ClInclude Include="container\data_manager.h" />
     <ClInclude Include="container\tuple.h" />
+    <ClInclude Include="container\vector.h" />
     <ClInclude Include="floatingpoint.h" />
     <ClInclude Include="integer.h" />
     <ClInclude Include="container\list.h" />
@@ -140,7 +141,7 @@
     <ClInclude Include="container\stack.h" />
     <ClInclude Include="Typelist.h" />
     <ClInclude Include="Types.h" />
-    <ClInclude Include="Vector\vector.h" />
+    <ClInclude Include="math\vector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -14,25 +14,26 @@ namespace ds {
 
 		static constexpr size_t num_elem = Block_size / sizeof(value_type);
 		static constexpr size_t size = num_elem * sizeof(value_type);
+		inline static constexpr value_type DEFAULT{0};
 	private:
-		pointer data = nullptr;
+		pointer elems = nullptr;
 
 	public:
 		block() = default;
 
-		block( const value_type& val ) : data( new value_type[num_elem] ) {
+		block( const value_type& val ) : elems( new value_type[num_elem] ) {
 			for ( size_t i = 0; i < num_elem; i++ )
-				data[i] = val;
+				elems[i] = val;
 		}
 
-		block( block&& b ) : data(b.data) {
-			b.data = nullptr;
+		block( block&& b ) : elems(b.elems) {
+			b.elems = nullptr;
 		}
 
 		block& operator = ( block&& b ) {
-			delete[] data;
-			data = b.data;
-			b.data = nullptr;
+			delete[] elems;
+			elems = b.elems;
+			b.elems = nullptr;
 		}
 
 		block(const block&) = delete;
@@ -44,17 +45,17 @@ namespace ds {
 		}
 
 		value_type& operator [] ( size_t index ) {
-			return index < num_elem ? data[index] : value_type();
+			return index < num_elem ? elems[index] : const_cast<value_type&>(DEFAULT);
 		}
 
 		const value_type& operator [] ( size_t index ) const {
-			return index < num_elem ? data[index] : value_type();
+			return index < num_elem ? elems[index] : DEFAULT;
 		}
 
 
 		~block() {
-			if ( data != nullptr )
-				delete[] data;
+			if ( elems != nullptr )
+				delete[] elems;
 		}
 	};
 
@@ -312,6 +313,8 @@ namespace ds {
 		using node_type = duo_node<T>;
 
 		using iterator = iterators::bi_traverse_iterator<T>;
+
+		inline static constexpr value_type DEFAULT{ 0 };
 	private:
 		size_t _size = 10;
 		node_type* elems = nullptr;
@@ -413,14 +416,14 @@ namespace ds {
 			iterator iter = _begin;
 			for (size_t i = 0; i < index && iter != end(); i++)
 				++iter;
-			return iter.get() != nullptr ? iter->value : value_type();
+			return iter.get() != nullptr ? iter->value : const_cast<value_type&>(DEFAULT);
 		}
 
 		const value_type& at( size_t index ) const {
 			iterator iter = _begin;
 			for (size_t i = 0; i < index && iter != end(); i++)
 				++iter;
-			return iter.get() != nullptr ? iter->value : value_type();
+			return iter.get() != nullptr ? iter->value : DEFAULT;
 		}
 
 		bool erase( const value_type& val ) {

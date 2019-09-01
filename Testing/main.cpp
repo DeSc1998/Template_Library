@@ -3,13 +3,15 @@
 
 #include "container/stack.h"
 #include "container/list.h"
+#include "container/vector.h"
 
 void stack_test();
 void list_test();
+void vector_test();
 
 int main() {
 
-	list_test();
+	vector_test();
 
 	std::cin.get();
 	return 0;
@@ -92,5 +94,12 @@ void list_test() {
 
 	std::cout << '\n' << list.size() << '\n' << '\n';
 
-	std::cout << list;
+	std::cout << list << "\n\n";
+
+	// index operator test
+	std::cout << list[5];
+}
+
+void vector_test() {
+	ds::vector<int> vec;
 }
