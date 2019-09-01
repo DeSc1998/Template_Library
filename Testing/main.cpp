@@ -45,7 +45,7 @@ void stack_test() {
 	std::cout << "\n\n";
 	for (int i = 1; i < 51; i++)
 		st.push(i * 2);
-
+  
 	// foreach test (passed)
 	for (auto node : st)
 		std::cout << node.value << ", ";
