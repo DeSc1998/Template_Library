@@ -7,11 +7,12 @@ namespace ds {
 	template < typename Type, size_t Block_size = 0x800 >
 	class block {
 	public:
-		struct Index { size_t block_index = 0, value_index = 0; };
+		struct index_type { size_t block_index = 0, value_index = 0; };
 
 		using value_type = Type;
 		using pointer = Type *;
 
+		static constexpr size_t block_size = Block_size;
 		static constexpr size_t num_elem = Block_size / sizeof(value_type);
 		static constexpr size_t size = num_elem * sizeof(value_type);
 		inline static constexpr value_type DEFAULT{0};
@@ -40,8 +41,8 @@ namespace ds {
 		block& operator = (const block&) = delete;
 		
 
-		static Index parse_index( size_t index ) {
-			return Index{ index / num_elem, index % num_elem };
+		static index_type parse_index( size_t index ) {
+			return index_type{ index / num_elem, index % num_elem };
 		}
 
 		value_type& operator [] ( size_t index ) {
@@ -59,17 +60,56 @@ namespace ds {
 		}
 	};
 
+	template < typename T, size_t Size >
+	class block_iterator {
+	public:
+		using block_type = block<T, Size>;
+		using index_type = typename block_type::index_type;
+
+		using value_type = typename block_type::value_type;
+
+	private:
+		index_type index;
+		block_type* blocks = nullptr;
+	public:
+		block_iterator() = default;
+
+		block_iterator( block_type* ptr, index_type index ) :
+			blocks( ptr ),
+			index(index)
+		{}
+
+		block_iterator( const block_iterator& iter ) :
+			index( iter.index ),
+			blocks( iter.blocks )
+		{}
+
+
+		value_type& operator * () {
+			return blocks[index.block_index][index.value_index];
+		}
+
+		const value_type& operator * () const {
+			return blocks[index.block_index][index.value_index];
+		}
+
+
+	};
+
 
 	template < typename T, typename Node = void >
 	class data_manager {
 	public:
-		using value_type = T;
-		using pointer = T *;
+		using block_type = block<T>;
+		using value_type = typename block_type::value_type;
+		using pointer = typename block_type::pointer;
 
 		using iterator = pointer;
+		//using iterator = block_iterator<value_type, block_type::block_size>;
 	private:
 		size_t _size = 10;
 		pointer elems = new value_type[size];
+		//block_type (elems)[10];
 
 	public:
 
@@ -117,14 +157,14 @@ namespace ds {
 			if (index < _size)
 				return elems[index];
 			else
-				return ;
+				return const_cast<value_type&>(block_type::DEFAULT);
 		}
 
 		const value_type& operator [] ( size_t index ) const {
 			if (index < _size)
 				return elems[index];
 			else
-				return ;
+				return block_type::DEFAULT;
 		}
 
 
@@ -167,12 +207,20 @@ namespace ds {
 			return iterator(&elems[0]);
 		}
 
+		iterator iterator_at( size_t index ) {
+			return iterator( &elems[index] );
+		}
+
+		iterator iterator_at( size_t index ) const {
+			return iterator( &elems[index] );
+		}
+
 		iterator end() const {
-			return iterator( ++(&elems[_size-1]) );
+			return iterator( &elems[_size-1]+1 );
 		}
 
 		iterator end() {
-			return iterator(++(&elems[_size - 1]));
+			return iterator( &elems[_size-1]+1 );
 		}
 
 		~data_manager() {

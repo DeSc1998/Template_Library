@@ -30,40 +30,68 @@ namespace ds {
 
 
 		void push_back( const value_type& val ) {
+			if ( last_elem + 1 == data.size() )
+				data.resize( data.size() + 10 );
+
 			data[++last_elem] = val;
 		}
 
 		void push_back( value_type&& val ) {
+			if ( last_elem + 1 == data.size() )
+				data.resize( data.size() + 10 );
+
 			data[++last_elem] = std::move(val);
 		}
 
 		void push_front( const value_type& val ) {
+			if (last_elem + 1 == data.size())
+				data.resize(data.size() + 10);
+
 			shift_at();
 			data[0] = val;
 			++last_elem;
 		}
 
 		void push_front( value_type&& val ) {
+			if (last_elem + 1 == data.size())
+				data.resize(data.size() + 10);
+
 			shift_at();
 			data[0] = std::move(val);
 			++last_elem;
 		}
 
 		void insert( const value_type& val, size_t index = 0 ) {
+			if (last_elem + 1 == data.size())
+				data.resize(data.size() + 10);
+
 			shift_at(index);
 			data[index] = val;
 			++last_elem;
 		}
 
 		void insert(value_type&& val, size_t index = 0) {
+			if (last_elem + 1 == data.size())
+				data.resize(data.size() + 10);
+
 			shift_at(index);
 			data[index] = std::move(val);
 			++last_elem;
 		}
 
 		void shift_at( size_t index = 0, long long amount = 1 ) {
-			for (size_t i = last_elem; i >= index; i-- )
-				data[i + amount] = std::move( data[i] );
+			if ( data[0] != value_type() ) {
+				if (amount > 0) {
+					for (size_t i = last_elem; i > index; i--)
+						data[i + amount] = std::move( data[i] );
+
+					data[index + amount] = std::move( data[index] );
+				}
+				else if (amount < 0) {
+					for (size_t i = index; i < last_elem; i++)
+						data[i] = std::move( data[i + amount] );
+				}
+			}
 		}
 
 		value_type& operator [] ( size_t index ) {
@@ -74,7 +102,7 @@ namespace ds {
 			return data[index];
 		}
 
-		void erase( size_t index ) {
+		void erase_at( size_t index ) {
 			shift_at(index, -1);
 			--last_elem;
 		}

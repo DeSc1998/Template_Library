@@ -102,4 +102,45 @@ void list_test() {
 
 void vector_test() {
 	ds::vector<int> vec;
+
+	// insertion test
+	vec.insert(15);
+	vec.insert(12);
+	vec.insert(19, 1);
+	vec.insert(34, 1);
+	vec.push_back(55);
+	vec.push_back(76);
+	vec.push_front(100);
+	vec.push_front(200);
+
+	// iterator test
+	for (auto iter = vec.begin(); iter != vec.end(); ++iter) {
+		std::cout << *iter << ", ";
+	}
+	std::cout << '\n';
+
+	// erase test
+	vec.erase_at(2);
+	vec.erase_at(2);
+	vec.erase_at(2);
+
+	vec.erase(10);
+	vec.erase(15);
+	vec.erase(19);
+
+	// foreach test
+	for (auto val : vec) {
+		std::cout << val << ", ";
+	}
+	std::cout << '\n';
+
+	// insertion beyond default size
+	for ( size_t i = 0; i < 51; i++ ) {
+		vec.push_back( i*2 );
+	}
+
+	for ( auto var : vec) {
+		std::cout << var << ", ";
+	}
+	std::cout << '\n';
 }
