@@ -106,10 +106,31 @@ void vector_test() {
 	// insertion test
 	vec.insert(15);
 	vec.insert(12);
+
+	// iterator test
+	for (auto iter = vec.begin(); iter != vec.end(); ++iter) {
+		std::cout << *iter << ", ";
+	}
+	std::cout << '\n';
+
 	vec.insert(19, 1);
 	vec.insert(34, 1);
+
+	// iterator test
+	for (auto iter = vec.begin(); iter != vec.end(); ++iter) {
+		std::cout << *iter << ", ";
+	}
+	std::cout << '\n';
+
 	vec.push_back(55);
 	vec.push_back(76);
+
+	// iterator test
+	for (auto iter = vec.begin(); iter != vec.end(); ++iter) {
+		std::cout << *iter << ", ";
+	}
+	std::cout << '\n';
+
 	vec.push_front(100);
 	vec.push_front(200);
 
@@ -117,7 +138,7 @@ void vector_test() {
 	for (auto iter = vec.begin(); iter != vec.end(); ++iter) {
 		std::cout << *iter << ", ";
 	}
-	std::cout << '\n';
+	std::cout << '\n' << '\n';
 
 	// erase test
 	vec.erase_at(2);
@@ -143,4 +164,6 @@ void vector_test() {
 		std::cout << var << ", ";
 	}
 	std::cout << '\n';
+
+	std::cout << vec;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 #include "data_manager.h"
 
 namespace ds {
@@ -33,14 +35,14 @@ namespace ds {
 			if ( last_elem + 1 == data.size() )
 				data.resize( data.size() + 10 );
 
-			data[++last_elem] = val;
+			data[last_elem++] = val;
 		}
 
 		void push_back( value_type&& val ) {
 			if ( last_elem + 1 == data.size() )
 				data.resize( data.size() + 10 );
 
-			data[++last_elem] = std::move(val);
+			data[last_elem++] = std::move(val);
 		}
 
 		void push_front( const value_type& val ) {
@@ -89,7 +91,7 @@ namespace ds {
 				}
 				else if (amount < 0) {
 					for (size_t i = index; i < last_elem; i++)
-						data[i] = std::move( data[i + amount] );
+						data[i] = std::move( data[i - amount] );
 				}
 			}
 		}
@@ -127,12 +129,32 @@ namespace ds {
 		}
 
 		iterator end() {
-			return data.end();
+			return iterator( &data[last_elem] );
 		}
 
 		iterator end() const {
-			return data.end();
+			return iterator( &data[last_elem] );
 		}
 	};
+
+
+	template < typename T >
+	std::ostream& operator << ( std::ostream& stream, const vector<T>& vec ) {
+		auto iter = vec.begin();
+
+		while ( iter != vec.end() ) {
+			if ( iter == vec.begin() )
+				stream << '[';
+
+			stream << *iter;
+
+			if (++iter == vec.end())
+				stream << ']';
+			else
+				stream << ';';
+		}
+
+		return stream;
+	}
 
 }
