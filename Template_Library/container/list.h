@@ -119,7 +119,7 @@ namespace ds {
 			if ( (iter++) == l.end() )
 				out << ']';
 			else
-				out << ", ";
+				out << ';';
 		}
 
 		return out;

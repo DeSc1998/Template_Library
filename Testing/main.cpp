@@ -3,13 +3,15 @@
 
 #include "container/stack.h"
 #include "container/list.h"
+#include "container/vector.h"
 
 void stack_test();
 void list_test();
+void vector_test();
 
 int main() {
 
-	list_test();
+	vector_test();
 
 	std::cin.get();
 	return 0;
@@ -92,5 +94,76 @@ void list_test() {
 
 	std::cout << '\n' << list.size() << '\n' << '\n';
 
-	std::cout << list;
+	std::cout << list << "\n\n";
+
+	// index operator test
+	std::cout << list[5];
+}
+
+void vector_test() {
+	ds::vector<int> vec;
+
+	// insertion test
+	vec.insert(15);
+	vec.insert(12);
+
+	// iterator test
+	for (auto iter = vec.begin(); iter != vec.end(); ++iter) {
+		std::cout << *iter << ", ";
+	}
+	std::cout << '\n';
+
+	vec.insert(19, 1);
+	vec.insert(34, 1);
+
+	// iterator test
+	for (auto iter = vec.begin(); iter != vec.end(); ++iter) {
+		std::cout << *iter << ", ";
+	}
+	std::cout << '\n';
+
+	vec.push_back(55);
+	vec.push_back(76);
+
+	// iterator test
+	for (auto iter = vec.begin(); iter != vec.end(); ++iter) {
+		std::cout << *iter << ", ";
+	}
+	std::cout << '\n';
+
+	vec.push_front(100);
+	vec.push_front(200);
+
+	// iterator test
+	for (auto iter = vec.begin(); iter != vec.end(); ++iter) {
+		std::cout << *iter << ", ";
+	}
+	std::cout << '\n' << '\n';
+
+	// erase test
+	vec.erase_at(2);
+	vec.erase_at(2);
+	vec.erase_at(2);
+
+	vec.erase(10);
+	vec.erase(15);
+	vec.erase(19);
+
+	// foreach test
+	for (auto val : vec) {
+		std::cout << val << ", ";
+	}
+	std::cout << '\n';
+
+	// insertion beyond default size
+	for ( size_t i = 0; i < 51; i++ ) {
+		vec.push_back( i*2 );
+	}
+
+	for ( auto var : vec) {
+		std::cout << var << ", ";
+	}
+	std::cout << '\n';
+
+	std::cout << vec;
 }

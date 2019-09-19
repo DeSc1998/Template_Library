@@ -30,9 +30,6 @@
     <ClInclude Include="Typelist.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="Vector\vector.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="Nodes\duo_node.h">
       <Filter>Headerdateien\nodes</Filter>
     </ClInclude>
@@ -61,6 +58,12 @@
       <Filter>Headerdateien\container</Filter>
     </ClInclude>
     <ClInclude Include="container\tuple.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="container\vector.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
