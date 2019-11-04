@@ -9,8 +9,20 @@ void stack_test();
 void list_test();
 void vector_test();
 
+
+
 int main() {
 
+
+
+	stack_test();
+	
+	std::cout << "\n\n\n";
+	
+	list_test();
+	
+	std::cout << "\n\n\n";
+	
 	vector_test();
 
 	std::cin.get();
@@ -156,7 +168,7 @@ void vector_test() {
 	std::cout << '\n';
 
 	// insertion beyond default size
-	for ( size_t i = 0; i < 51; i++ ) {
+	for ( int i = 0; i < 51; i++ ) {
 		vec.push_back( i*2 );
 	}
 

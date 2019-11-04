@@ -4,8 +4,8 @@
 
 namespace ds {
 
-	template < typename Type >
-	class mono_list : public stack<Type> {
+	template < typename T >
+	class mono_list : public stack<T> {
 
 	};
 

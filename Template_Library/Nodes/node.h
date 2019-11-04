@@ -45,13 +45,13 @@ namespace ds {
 
 		// iterator base for node based containers
 		template <
-			typename Type,
+			typename T,
 			typename Node,
 			typename = std::enable_if_t< is_node_v<Node> >
 		>
 			class iterator_base {
 			public:
-				using value_type = Type;
+				using value_type = T;
 				using node_type = Node;
 
 			protected:
@@ -60,8 +60,8 @@ namespace ds {
 			public:
 				iterator_base() = default;
 
-				iterator_base(node_type* ptr) {
-					this->ptr = ptr;
+				iterator_base(node_type* p) {
+					ptr = p;
 				}
 
 				iterator_base(const iterator_base& iter) {
@@ -112,25 +112,27 @@ namespace ds {
 				virtual iterator_base& operator ++ (int) = 0;
 				virtual iterator_base& operator -- () { return *this; }
 				virtual iterator_base& operator -- (int) { return *this; }
+
+				virtual ~iterator_base() {};
 		};
 
-		template < typename Type >
-		using mono_iter_base = iterator_base< Type, mono_node<Type> >;
+		template < typename T >
+		using mono_iter_base = iterator_base< T, mono_node<T> >;
 
-		template < typename Type >
-		using duo_iter_base = iterator_base< Type, duo_node<Type> >;
+		template < typename T >
+		using duo_iter_base = iterator_base< T, duo_node<T> >;
 
 
-		template < typename Type >
-		class traverse_iterator : public mono_iter_base<Type> {
-			using iterator_base_type = mono_iter_base<Type>;
+		template < typename T >
+		class traverse_iterator : public mono_iter_base<T> {
+			using iterator_base_type = mono_iter_base<T>;
 
 			using node_type = typename iterator_base_type::node_type;
 		public:
 
 			traverse_iterator() : iterator_base_type() {}
 
-			traverse_iterator( node_type* ptr ) : iterator_base_type( ptr ) {}
+			traverse_iterator( node_type* p ) : iterator_base_type(p) {}
 
 			traverse_iterator( const traverse_iterator& iter ) :
 				iterator_base_type( reinterpret_cast<const iterator_base_type&>(iter) ) {}
@@ -156,19 +158,21 @@ namespace ds {
 					this->ptr = this->ptr->next;
 				return *this;
 			}
+
+			~traverse_iterator() override {}
 		};
 
 
-		template < typename Type >
-		class bi_traverse_iterator : public duo_iter_base<Type> {
-			using iterator_base_type = duo_iter_base<Type>;
+		template < typename T >
+		class bi_traverse_iterator : public duo_iter_base<T> {
+			using iterator_base_type = duo_iter_base<T>;
 
 			using node_type = typename iterator_base_type::node_type;
 		public:
 
 			bi_traverse_iterator() : iterator_base_type() {}
 
-			bi_traverse_iterator( node_type* ptr ) : iterator_base_type(ptr) {}
+			bi_traverse_iterator( node_type* p ) : iterator_base_type(p) {}
 
 			bi_traverse_iterator( const bi_traverse_iterator& iter ) :
 				iterator_base_type( reinterpret_cast<const iterator_base_type&>(iter) ) {}
@@ -183,31 +187,34 @@ namespace ds {
 			}
 
 
-			iterator_base_type& operator ++ () {
+			iterator_base_type& operator ++ () override {
 				if ( this->ptr != nullptr )
 					this->ptr = this->ptr->next;
 				return *this;
 			}
 
-			iterator_base_type& operator ++ (int) {
+			iterator_base_type& operator ++ (int) override {
 				if (this->ptr != nullptr)
 					this->ptr = this->ptr->next;
 				return *this;
 			}
 
-			iterator_base_type& operator -- () {
+			iterator_base_type& operator -- () override {
 				if (this->ptr != nullptr)
 					this->ptr = this->ptr->prev;
 				return *this;
 			}
 
-			iterator_base_type& operator -- (int) {
+			iterator_base_type& operator -- (int) override {
 				if (this->ptr != nullptr)
 					this->ptr = this->ptr->prev;
 				return *this;
 			}
+
+			~bi_traverse_iterator() override {}
 		};
 
 	}
 
 }
+

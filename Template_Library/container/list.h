@@ -9,8 +9,8 @@
 namespace ds {
 
 	template < 
-		typename Type,
-		typename Manager = data_manager< Type, duo_node<Type> >
+		typename T,
+		typename Manager = data_manager< T, duo_node<T> >
 	>
 	class list {
 	public:

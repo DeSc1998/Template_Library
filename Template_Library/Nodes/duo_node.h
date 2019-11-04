@@ -6,23 +6,23 @@
 
 namespace ds {
 
-	template < typename Type >
+	template < typename T >
 	class duo_node {
 	public:
-		Type value{};
+		T value{};
 		duo_node *prev = nullptr, *next = nullptr;
 
 
 		duo_node() = default;
 
-		duo_node( const Type& t ) : value(t) {}
+		duo_node( const T& t ) : value(t) {}
 
-		duo_node( const Type& t, const_pointer<duo_node> _next, const_pointer<duo_node> _prev = nullptr ) :
-			value( t ), next(_next), prev(_prev)
+		duo_node( const T& t, const_pointer<duo_node> _next, const_pointer<duo_node> _prev = nullptr ) :
+			value( t ), prev(_prev), next(_next)
 		{}
 
 		duo_node( const duo_node& node ) : 
-			value(node.value), next(node.next), prev(node.prev)
+			value(node.value), prev(node.prev), next(node.next)
 		{}
 
 		duo_node( duo_node&& node ) {

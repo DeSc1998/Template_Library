@@ -6,8 +6,8 @@
 namespace ds {
 
 	template < 
-		typename Type,
-		typename Manager = data_manager< Type, mono_node<Type> > 
+		typename T,
+		typename Manager = data_manager< T, mono_node<T> > 
 	>
 	class stack {
 	public:

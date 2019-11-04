@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="container\binarytree.h" />
+    <ClInclude Include="container\block.h" />
     <ClInclude Include="container\data_manager.h" />
     <ClInclude Include="container\tuple.h" />
     <ClInclude Include="container\vector.h" />
