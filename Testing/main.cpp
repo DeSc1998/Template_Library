@@ -44,7 +44,7 @@ void stack_test() {
 
 	// iterator test (passed)
 	for (auto iter = st.begin(); iter != st.end(); ++iter)
-		std::cout << iter->value << ", ";
+		std::cout << *iter << ", ";
 
 	std::cout << "\n\n";
 
@@ -61,8 +61,8 @@ void stack_test() {
 		st.push(i * 2);
   
 	// foreach test (passed)
-	for (auto node : st)
-		std::cout << node.value << ", ";
+	for (auto value : st)
+		std::cout << value << ", ";
 }
 
 void list_test() {

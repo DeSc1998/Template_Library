@@ -7,12 +7,11 @@ namespace ds {
 
 	template < 
 		typename T,
-		typename Manager = data_manager< T, mono_node<T> > 
+		typename Manager = data_manager< T > 
 	>
 	class stack {
 	public:
 		using value_type = typename Manager::value_type;
-		using node_type = typename Manager::node_type;
 
 		using iterator = typename Manager::iterator;
 
@@ -24,13 +23,11 @@ namespace ds {
 		stack() = default;
 
 		stack( const value_type& t ) {
-			data.insert( t );
-			++num_elements;
+			data[num_elements++] = t;
 		}
 
 		stack( value_type&& val ) {
-			data.insert( std::forward<value_type>(val) );
-			++num_elements;
+			data[num_elements++] = std::move( val );
 		}
 
 		stack( stack&& st ) {
@@ -49,22 +46,24 @@ namespace ds {
 
 
 		void push( const value_type& t ) {
-			data.insert( t );
-			++num_elements;
+			data[num_elements++] = t;
 		}
 
 		void push( value_type&& t ) {
-			data.insert( std::forward<value_type>(t) );
-			++num_elements;
+			data[num_elements++] = std::move( t );
 		}
 
 		const value_type& top() const {
-			return data.top();
+			return data[num_elements - 1];
 		}
 
 		void pop() {
-			data.pop();
-			--num_elements;
+			if ( num_elements != 0 )
+				data[num_elements--] = value_type();
+		}
+
+		size_t size() noexcept {
+			return num_elements;
 		}
 
 		bool is_empty() const {
@@ -76,7 +75,7 @@ namespace ds {
 		}
 
 		iterator end() const {
-			return data.end();
+			return data.iterator_at( num_elements );
 		}
 
 		iterator begin() {
@@ -84,7 +83,7 @@ namespace ds {
 		}
 
 		iterator end() {
-			return data.end();
+			return data.iterator_at( num_elements );
 		}
 	};
 

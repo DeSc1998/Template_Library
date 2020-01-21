@@ -84,9 +84,6 @@ namespace ds {
 		}
 
 		const value_type& operator [] ( size_t index ) const noexcept {
-			if (index >= _size * block_type::num_elem)
-				expand_by(1);
-
 			const auto block_index = index / block_type::num_elem;
 			const auto value_index = index % block_type::num_elem;
 			return elems[block_index][value_index];
