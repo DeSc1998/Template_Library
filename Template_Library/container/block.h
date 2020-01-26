@@ -40,21 +40,24 @@ namespace ds {
 			std::copy( other.elems->begin(), other.elems->end(), elems->begin() );
 		}
 
-		block(block&&) = default;
+		block( block&& other ) : elems( std::move(other.elems) ) {}
 
 		block& operator = (const block& other) {
 			std::copy( other.elems->begin(), other.elems->end(), elems->begin() );
 			return *this;
 		}
 
-		block& operator = (block&&) = default;
+		block& operator = ( block&& other ) noexcept {
+			elems = std::move( other.elems );
+			return *this;
+		}
 
 
-		reference operator [] (size_t index) noexcept {
+		reference operator [] (size_t index) {
 			return (*elems)[index];
 		}
 
-		const_reference operator [] (size_t index) const noexcept {
+		const_reference operator [] (size_t index) const {
 			return (*elems)[index];
 		}
 
@@ -113,6 +116,9 @@ namespace ds {
 		using value_type      = typename block_type::value_type;
 		using reference       = typename block_type::reference;
 		using const_reference = typename block_type::const_reference;
+		using pointer         = typename block_type::value_type*;
+		using difference_type = ptrdiff_t;
+		
 
 	private:
 		Iter block_pos;
@@ -130,6 +136,15 @@ namespace ds {
 			block_pos(iter.block_pos),
 			block(iter.block)
 		{}
+
+		block_iterator( block_iterator&& iter ) :
+			block_pos( std::move(iter.block_pos) ),
+			block( std::move(iter.block) )
+		{}
+
+		operator std::reverse_iterator<block_iterator>() {
+			return std::reverse_iterator<block_iterator>( block_iterator(block_pos, block) );
+		}
 
 		block_iterator& operator = ( const block_iterator& other ) noexcept {
 			block_pos = other.block_pos;
@@ -211,10 +226,10 @@ namespace ds {
 		constexpr size_t operator - ( const block_iterator& other ) const {
 			const auto front_dist = std::distance( block_pos, block->end() );
 			const auto back_dist = std::distance( other.block->begin(), other.block_pos );
-			const auto rest_dist = block != other.block ? 
+			const auto middle_dist = block != other.block ? 
 				(std::distance( other.block, block ) - 1) * block->size() : 0;
 
-			return front_dist + back_dist + rest_dist;
+			return front_dist + back_dist + middle_dist;
 		}
 
 
@@ -240,6 +255,9 @@ namespace ds {
 			return !( *this == other );
 		}
 	};
+
+	template < typename T , size_t S >
+	using reverse_block_iterator = std::reverse_iterator< block_iterator<T, S> >;
 
 
 	template < typename T, size_t Size = block<T>::block_size() >

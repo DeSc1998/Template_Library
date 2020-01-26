@@ -15,7 +15,8 @@ namespace ds {
 		using const_reference = typename block_type::const_reference;
 		using pointer         = typename block_type::pointer;
 
-		using iterator = block_iterator<value_type, block_type::block_size()>;
+		using iterator         = block_iterator<value_type, block_type::block_size()>;
+		using reverse_iterator = reverse_block_iterator<value_type, block_type::block_size()>;
 	private:
 		size_t _block_count = 10, _size = 0;
 		std::unique_ptr<block_type[]> elems = std::make_unique<block_type[]>( _block_count );
@@ -23,8 +24,7 @@ namespace ds {
 	public:
 
 		data_manager() {
-			elems[0] = block_type( value_type() );
-			++_size;
+			elems[_size++] = block_type( value_type() );
 		}
 
 		data_manager( data_manager&& dm ) : 
@@ -74,7 +74,7 @@ namespace ds {
 			}
 		}
 
-		value_type& operator [] ( size_t index ) noexcept {
+		value_type& operator [] ( size_t index ) {
 			if ( index >= _size * block_type::num_elem )
 				expand_by(1);
 
@@ -83,7 +83,7 @@ namespace ds {
 			return elems[block_index][value_index];
 		}
 
-		const value_type& operator [] ( size_t index ) const noexcept {
+		const value_type& operator [] ( size_t index ) const {
 			const auto block_index = index / block_type::num_elem;
 			const auto value_index = index % block_type::num_elem;
 			return elems[block_index][value_index];
@@ -99,19 +99,18 @@ namespace ds {
 
 			_block_count = new_block_count;
 			elems = std::move(tmp);
-			expand_by(1);
 		}
 
 		void expand_by( size_t blocks ) {
 			if (_size == _block_count)
-				resize( _block_count + blocks + 1 );
+				resize( _block_count + blocks );
 
 			for (; blocks > 0; --blocks) {
 				elems[_size++] = block_type( value_type() );
 			}
 		}
 
-		iterator find_space() const {
+		iterator find_space() const noexcept {
 			auto iter = begin();
 			auto last = end();
 
@@ -125,28 +124,48 @@ namespace ds {
 		
 		constexpr size_t size() const noexcept { return end() - begin(); }
 
-		constexpr iterator begin() const {
+		constexpr iterator begin() const noexcept {
 			return iterator( elems[0].begin(), std::addressof(elems[0]) );
 		}
 
-		constexpr iterator begin() {
+		constexpr iterator begin() noexcept {
 			return iterator( elems[0].begin(), std::addressof(elems[0]) );
 		}
+		
+		constexpr iterator rend() const noexcept {
+			return reverse_iterator( 
+				iterator( elems[0].rend(), std::addressof(elems[0]) ) 
+			);
+		}
 
-		constexpr iterator iterator_at( size_t index ) {
+		constexpr iterator rend() noexcept {
+			return reverse_iterator(
+				iterator( elems[0].rend(), std::addressof(elems[0]) )
+			);
+		}
+
+		constexpr iterator iterator_at( size_t index ) noexcept {
 			return begin() + index;
 		}
 
-		constexpr iterator iterator_at( size_t index ) const {
+		constexpr iterator iterator_at( size_t index ) const noexcept {
 			return begin() + index;
 		}
 
-		constexpr iterator end() const {
+		constexpr iterator end() const noexcept {
 			return iterator( elems[_size - 1].end(), std::addressof(elems[_size - 1]) );
 		}
 
-		constexpr iterator end() {
+		constexpr iterator end() noexcept {
 			return iterator( elems[_size - 1].end(), std::addressof(elems[_size - 1]) );
+		}
+		
+		constexpr iterator rbegin() const noexcept {
+			return iterator( elems[_size - 1].rbegin(), std::addressof(elems[_size - 1]) );
+		}
+
+		constexpr iterator rbegin() noexcept {
+			return iterator( elems[_size - 1].rbegin(), std::addressof(elems[_size - 1]) );
 		}
 	};
 
