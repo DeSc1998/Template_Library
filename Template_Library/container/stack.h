@@ -30,6 +30,11 @@ namespace ds {
 			data[num_elements++] = std::move( val );
 		}
 
+		stack( const stack& st ) :
+			data( st.data ),
+			num_elements( st.num_elements )
+		{}
+
 		stack( stack&& st ) noexcept {
 			data = std::move(st.data);
 			num_elements = st.num_elements;
@@ -41,8 +46,12 @@ namespace ds {
 			return *this;
 		}
 
-		stack(const stack& st) = delete;
-		stack& operator = ( const stack& ) = delete;
+		stack& operator = ( const stack& st ) {
+			data = st.data;
+			num_elements = st.num_elements;
+
+			return *this;
+		}
 
 
 		void push( const value_type& t ) {

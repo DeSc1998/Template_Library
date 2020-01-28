@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #include "block.h"
 #include "../Nodes/node.h"
 
@@ -18,43 +20,54 @@ namespace ds {
 		using iterator         = block_iterator<value_type, block_type::block_size()>;
 		using reverse_iterator = reverse_block_iterator<value_type, block_type::block_size()>;
 	private:
-		size_t _block_count = 10, _size = 0;
-		std::unique_ptr<block_type[]> elems = std::make_unique<block_type[]>( _block_count );
+		size_t Block_count = 10, Size = 0;
+		std::unique_ptr<block_type[]> elems = std::make_unique<block_type[]>( Block_count );
 
 	public:
 
 		data_manager() {
-			elems[_size++] = block_type( value_type() );
+			elems[Size++] = block_type( value_type() );
 		}
 
-		data_manager( data_manager&& dm ) : 
-			_block_count(dm._block_count),
-			_size(dm._size),
-			elems( std::move(dm.elems) ) 
+		data_manager( const data_manager& other ) :
+			elems( other.elems ),
+			Block_count( other.Block_count ),
+			Size( other.Size )
 		{}
 
-		data_manager(const data_manager&) = delete;
+		data_manager( data_manager&& dm ) : 
+			elems( std::move(dm.elems) ), 
+			Block_count( dm.Block_count ),
+			Size( dm.Size )
+		{}
 
-		data_manager& operator = ( data_manager&& dm ) {
-			_block_count = dm._block_count;
-			elems = std::move(dm.elems);
+		data_manager& operator = ( const data_manager& dm ) {
+			elems = dm.elems;
+			Block_count = dm.Block_count;
+			Size = dm.Size;
+
 			return *this;
 		}
 
-		data_manager& operator = (const data_manager&) = delete;
+		data_manager& operator = ( data_manager&& dm ) {
+			elems = std::move(dm.elems);
+			Block_count = dm.Block_count;
+			Size = dm.Size;
+			return *this;
+		}
 
 
 		void insert( const value_type& val ) {
 			auto iter = find_space();
 			if ( iter != end() )
 				*iter = val;
-			else if (_size < _block_count) {
-				elems[_size++] = block_type( value_type() );
+			else if (Size < Block_count) {
+				elems[Size++] = block_type( value_type() );
 				++(--iter);
 				*iter = std::move(val);
 			} else {
-				resize(_block_count + 10);
-				elems[_size++] = block_type( value_type() );
+				resize(Block_count + 10);
+				elems[Size++] = block_type( value_type() );
 				++(--iter);
 				*iter = val;
 			}
@@ -64,28 +77,28 @@ namespace ds {
 			auto iter = find_space();
 			if ( iter != end() )
 				*iter = std::move(val);
-			else if (_size < _block_count) {
+			else if (Size < Block_count) {
 				++(--iter);
 				*iter = std::move(val);
 			} else {
-				resize(_block_count + 10);
+				resize(Block_count + 10);
 				++(--iter);
 				*iter = std::move(val);
 			}
 		}
 
 		value_type& operator [] ( size_t index ) {
-			if ( index >= _size * block_type::num_elem )
+			if ( index >= Size * block_type::num_elements )
 				expand_by(1);
 
-			const auto block_index = index / block_type::num_elem;
-			const auto value_index = index % block_type::num_elem;
+			const auto block_index = index / block_type::num_elements;
+			const auto value_index = index % block_type::num_elements;
 			return elems[block_index][value_index];
 		}
 
 		const value_type& operator [] ( size_t index ) const {
-			const auto block_index = index / block_type::num_elem;
-			const auto value_index = index % block_type::num_elem;
+			const auto block_index = index / block_type::num_elements;
+			const auto value_index = index % block_type::num_elements;
 			return elems[block_index][value_index];
 		}
 
@@ -94,19 +107,19 @@ namespace ds {
 			std::unique_ptr<block_type[]> tmp =
 				std::make_unique<block_type[]>(new_block_count);
 
-			for ( size_t i = 0; i < new_block_count && i < _block_count; i++ )
+			for ( size_t i = 0; i < new_block_count && i < Block_count; i++ )
 				tmp[i] = std::move( elems[i] );
 
-			_block_count = new_block_count;
+			Block_count = new_block_count;
 			elems = std::move(tmp);
 		}
 
 		void expand_by( size_t blocks ) {
-			if (_size == _block_count)
-				resize( _block_count + blocks );
+			if (Size == Block_count)
+				resize( Block_count + blocks );
 
 			for (; blocks > 0; --blocks) {
-				elems[_size++] = block_type( value_type() );
+				elems[Size++] = block_type( value_type() );
 			}
 		}
 
@@ -153,145 +166,19 @@ namespace ds {
 		}
 
 		constexpr iterator end() const noexcept {
-			return iterator( elems[_size - 1].end(), std::addressof(elems[_size - 1]) );
+			return iterator( elems[Size - 1].end(), std::addressof(elems[Size - 1]) );
 		}
 
 		constexpr iterator end() noexcept {
-			return iterator( elems[_size - 1].end(), std::addressof(elems[_size - 1]) );
+			return iterator( elems[Size - 1].end(), std::addressof(elems[Size - 1]) );
 		}
 		
 		constexpr iterator rbegin() const noexcept {
-			return iterator( elems[_size - 1].rbegin(), std::addressof(elems[_size - 1]) );
+			return iterator( elems[Size - 1].rbegin(), std::addressof(elems[Size - 1]) );
 		}
 
 		constexpr iterator rbegin() noexcept {
-			return iterator( elems[_size - 1].rbegin(), std::addressof(elems[_size - 1]) );
-		}
-	};
-
-	template < typename T >
-	class data_manager <T, mono_node<T>> {
-	public:
-		using value_type = T;
-		using node_type = mono_node<T>;
-
-		using iterator = iterators::traverse_iterator<T>;
-	private:
-		size_t _size = 10;
-		node_type* elems = nullptr;
-		iterator _begin;
-
-	public:
-
-		data_manager() : _size(10), elems( new node_type[_size] ) {
-			init( elems, _size );
-		}
-
-		data_manager( data_manager&& dm ) : elems( dm.elems ) {
-			_size = dm._size;
-			dm.elems = nullptr;
-			_begin = dm._begin;
-		}
-
-		data_manager& operator = ( data_manager&& dm ) {
-			_size = dm._size;
-			delete[] elems;
-			elems = dm.elems;
-			dm.elems = nullptr;
-			_begin = dm._begin;
-			return *this;
-		}
-
-		data_manager(const data_manager&) = delete;
-		data_manager& operator = (const data_manager&) = delete;
-
-
-		void insert( const value_type& val ) {
-			size_t index = find_space();
-			if (index != _size) {
-				elems[index].value = val;
-			}
-			else {
-				resize(_size + 10);
-				elems[index].value = val;
-			}
-
-			elems[index].next = _begin.get();
-			_begin = iterator( std::addressof(elems[index]) );
-		}
-
-		void insert( value_type&& val ) {
-			size_t index = find_space();
-			if ( index != _size )
-				elems[index].value = std::move(val);
-			else {
-				resize( _size + 10 );
-				elems[index].value = std::move(val);
-			}
-
-			elems[index].next = _begin.get();
-			_begin = iterator( std::addressof(elems[index]) );
-		}
-
-		value_type& top() {
-			return _begin->value;
-		}
-
-		const value_type& top() const {
-			return _begin->value;
-		}
-
-		void pop() {
-			auto next = _begin->next;
-			*_begin = node_type();
-			_begin = iterator( next );
-		}
-
-
-		static void init( node_type* ptr, size_t size ) {
-			for (size_t i = 0; i < size; i++)
-				ptr[i] = node_type();
-		}
-
-		void resize( size_t new_size ) {
-			node_type* tmp = new node_type[new_size];
-			init( tmp, new_size );
-			iterator iter = begin();
-
-			for (size_t i = 0; i < new_size && iter != end(); i++) {
-				tmp[i].value = std::move( iter->value );
-				if ( i != 0 )
-					tmp[i-1].next = std::addressof(tmp[i]);
-				++iter;
-			}
-
-			_size = new_size;
-			delete[] elems;
-			elems = tmp;
-			_begin = iterator( std::addressof(tmp[0]) );
-		}
-
-		size_t find_space() const {
-			for (size_t i = 0; i < _size; i++) {
-				if (elems[i] == node_type())
-					return i;
-			}
-
-			return _size;
-		}
-
-		size_t size() const { return _size; }
-
-		iterator begin() const {
-			return iterator(_begin);
-		}
-
-		iterator end() const {
-			return iterator(nullptr);
-		}
-
-		~data_manager() {
-			delete[] elems;
+			return iterator( elems[Size - 1].rbegin(), std::addressof(elems[Size - 1]) );
 		}
 	};
 
@@ -304,27 +191,27 @@ namespace ds {
 		using iterator = iterators::bi_traverse_iterator<T>;
 
 	private:
-		size_t _size = 10;
+		size_t Size = 10;
 		node_type* elems = nullptr;
-		iterator _begin;
+		iterator Begin;
 
 	public:
 
-		data_manager() : _size(10), elems( new node_type[_size] ), _begin(&elems[0]) {
-			init( elems, _size );
+		data_manager() : Size(10), elems( new node_type[Size] ), Begin(&elems[0]) {
+			init( elems, Size );
 		}
 
-		data_manager( data_manager&& dm ) : _size(dm.size), elems(dm.elems) {
+		data_manager( data_manager&& dm ) : Size(dm.size), elems(dm.elems) {
 			dm.elems = nullptr;
-			_begin = dm._begin;
+			Begin = dm.Begin;
 		}
 
 		data_manager& operator = (data_manager&& dm) {
-			_size = dm.size;
+			Size = dm.size;
 			delete[] elems;
 			elems = dm.elems;
 			dm.elems = nullptr;
-			_begin = dm._begin;
+			Begin = dm.Begin;
 			return *this;
 		}
 
@@ -333,8 +220,8 @@ namespace ds {
 
 
 		void insert( const value_type& val, size_t index ) {
-			if (index >= _size)
-				resize( _size + 10 );
+			if (index >= Size)
+				resize( Size + 10 );
 
 			iterator iter = begin();
 			for (; index > 0; index-- )
@@ -344,8 +231,8 @@ namespace ds {
 		}
 
 		void insert( value_type&& val, size_t index ) {
-			if (index >= _size)
-				resize( _size + 10 );
+			if (index >= Size)
+				resize( Size + 10 );
 
 			iterator iter = begin();
 			for (; index > 0; index--)
@@ -356,22 +243,22 @@ namespace ds {
 
 		void insert( const value_type& val, iterator pos ) {
 			size_t index = find_space();
-			if (index == _size) {
+			if (index == Size) {
 				size_t iter_index = 0;
-				while (pos != _begin) { iter_index++; pos--; }
-				resize(_size + 10);
+				while (pos != Begin) { iter_index++; pos--; }
+				resize(Size + 10);
 				pos = iterator( std::addressof(elems[iter_index]) );
 			}
 
-			if ( *_begin != node_type() && pos != _begin ) {
+			if ( *Begin != node_type() && pos != Begin ) {
 				iterator prev = pos;
 				--prev;
 				link_nodes(prev, iterator( std::addressof(elems[index]) ));
 				link_nodes( iterator( std::addressof(elems[index]) ), *pos);
-			} else if ( *_begin != node_type() && pos == _begin ) {
+			} else if ( *Begin != node_type() && pos == Begin ) {
 				link_nodes(elems[index], *pos);
-				_begin = iterator( std::addressof(elems[index]) );
-				_begin->prev = nullptr;
+				Begin = iterator( std::addressof(elems[index]) );
+				Begin->prev = nullptr;
 			}
 
 			elems[index].value = val;
@@ -379,29 +266,29 @@ namespace ds {
 
 		void insert( value_type&& val, iterator pos ) {
 			size_t index = find_space();
-			if (index == _size) {
+			if (index == Size) {
 				size_t iter_index = 0;
-				while (pos != _begin) { iter_index++; pos--; }
-				resize(_size + 10);
+				while (pos != Begin) { iter_index++; pos--; }
+				resize(Size + 10);
 				pos = iterator( std::addressof(elems[iter_index]) );
 			}
 
-			if ( *_begin != node_type() && pos != _begin ) {
+			if ( *Begin != node_type() && pos != Begin ) {
 				iterator prev = pos;
 				--prev;
 				link_nodes( prev, iterator( std::addressof(elems[index]) ) );
 				link_nodes( iterator( std::addressof(elems[index]) ), pos );
-			} else if ( pos == _begin && *_begin != node_type() ) {
+			} else if ( pos == Begin && *Begin != node_type() ) {
 				link_nodes( elems[index], *pos );
-				_begin = iterator( std::addressof(elems[index]) );
-				_begin->prev = nullptr;
+				Begin = iterator( std::addressof(elems[index]) );
+				Begin->prev = nullptr;
 			}
 
 			elems[index].value = std::move(val);
 		}
 
 		value_type& at( size_t index ) {
-			iterator iter = _begin;
+			iterator iter = Begin;
 			for (size_t i = 0; i < index && iter != end(); i++)
 				++iter;
 			assert(iter.get() != nullptr);
@@ -409,7 +296,7 @@ namespace ds {
 		}
 
 		const value_type& at( size_t index ) const {
-			iterator iter = _begin;
+			iterator iter = Begin;
 			for (size_t i = 0; i < index && iter != end(); i++)
 				++iter;
 			assert(iter.get() != nullptr);
@@ -430,7 +317,7 @@ namespace ds {
 				iterator prev = pos, next = pos;
 				--prev; ++next;
 				if ( !link_nodes(prev, next) && prev.get() == nullptr )
-					_begin = next;
+					Begin = next;
 				*pos = node_type();
 				return true;
 			}
@@ -449,7 +336,7 @@ namespace ds {
 		}
 
 		bool is_in_bound( node_type* node ) const {
-			return node >= elems && node < elems + _size;
+			return node >= elems && node < elems + Size;
 		}
 
 		static void init( node_type* ptr, size_t size ) {
@@ -470,10 +357,10 @@ namespace ds {
 				++iter;
 			}
 
-			_size = new_size;
+			Size = new_size;
 			delete[] elems;
 			elems = tmp;
-			_begin = iterator( std::addressof(tmp[0]) );
+			Begin = iterator( std::addressof(tmp[0]) );
 		}
 
 		void link_nodes( node_type& n1, node_type& n2 ) {
@@ -491,24 +378,24 @@ namespace ds {
 		}
 
 		size_t find_space() const {
-			for (size_t i = 0; i < _size; i++) {
+			for (size_t i = 0; i < Size; i++) {
 				if (elems[i] == node_type())
 					return i;
 			}
 
-			return _size;
+			return Size;
 		}
 
-		size_t size() const { return _size; }
+		size_t size() const { return Size; }
 
 		iterator begin() const {
 			//check_linkage(elems, _size);
-			return iterator(_begin);
+			return iterator(Begin);
 		}
 
 		iterator begin() {
 			//check_linkage(elems, _size);
-			return iterator(_begin);
+			return iterator(Begin);
 		}
 
 		iterator end() const {

@@ -2,7 +2,6 @@
 
 #include <array>
 #include <memory>
-#include <cassert>
 #include <iterator>
 #include <algorithm>
 
@@ -11,15 +10,15 @@ namespace ds {
 	template < typename T, size_t Block_size = 0x800 >
 	class block {
 	public:
-		static constexpr size_t num_elem   = Block_size / sizeof(T);
-		static constexpr size_t Size       = num_elem * sizeof(T);
+		static constexpr size_t num_elements   = Block_size / sizeof(T);
+		static constexpr size_t Size       = num_elements * sizeof(T);
 		
 		using value_type      = T;
 		using reference       = value_type&;
 		using const_reference = const value_type&;
 		using pointer         = value_type*;
 
-		using array_type = std::array<value_type, num_elem>;
+		using array_type = std::array<value_type, num_elements>;
 		using iterator   = typename array_type::iterator;
 
 	private:
@@ -223,7 +222,7 @@ namespace ds {
 			return block_iterator( block_pos - value_off, block - block_off );
 		}
 
-		constexpr size_t operator - ( const block_iterator& other ) const {
+		constexpr difference_type operator - ( const block_iterator& other ) const {
 			const auto front_dist = std::distance( block_pos, block->end() );
 			const auto back_dist = std::distance( other.block->begin(), other.block_pos );
 			const auto middle_dist = block != other.block ? 
