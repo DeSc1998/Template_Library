@@ -6,30 +6,30 @@
 
 namespace ds {
 
-	template < typename Type >
+	template < typename T >
 	class vector {
-		static const Type default_value = Type{ 0u };
+		static const T default_value = T{ 0u };
 
 	public:
 		
-		class iterator : public std::iterator<std::bidirectional_iterator_tag, Type> {
+		class iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
 		protected:
 
-			Type* ptr;
+			T* ptr;
 
 		public:
 			iterator() = default;
 
-			iterator( Type* _ptr ) : ptr(_ptr) {}
+			iterator( T* _ptr ) : ptr(_ptr) {}
 
 
 			// Derefernzierung
-			Type& operator* () {
+			T& operator* () {
 				return *this->ptr;
 			}
 
 			// Derefernzierung
-			const Type& operator* () const {
+			const T& operator* () const {
 				return *this->ptr;
 			}
 
@@ -65,14 +65,14 @@ namespace ds {
 		}
 
 		size_t Size = 10, num_elements = 0;
-		std::unique_ptr<Type[]> elements = std::make_unique<Type[]>( Size );
+		std::unique_ptr<T[]> elements = std::make_unique<T[]>( Size );
 
 	public:
 		// Konstructoren
 		vector() = default;
 
 		explicit vector( const Type& ref ) {
-			elements = std::make_unique<Type[]>( 10 );
+			elements = std::make_unique<T[]>( 10 );
 			elements.init();
 			elements[0] = ref;
 			Size = 10;
@@ -80,7 +80,7 @@ namespace ds {
 		}
 
 		vector( const vector& other ) {
-			elements = std::make_unique<Type[]>( other.Size );
+			elements = std::make_unique<T[]>( other.Size );
 			vector::copy( other.begin(), other.end(), begin() );
 			Size = other.Size;
 			num_elements = other.num_elements;
@@ -88,7 +88,7 @@ namespace ds {
 
 		// ändern der Größe
 		void resize( size_t new_size ) {
-			auto temp = std::make_unique<Type[]>( new_size );
+			auto temp = std::make_unique<T[]>( new_size );
 			vector::copy( begin(), end(), iterator( &(*temp)) );
 			elements = std::move( temp );
 			Size = new_size;
@@ -118,25 +118,25 @@ namespace ds {
 			return Size;
 		}
 
-		const Type& at( size_t index ) const {
+		const T& at( size_t index ) const {
 			if ( index < this->Size )
 				return elements[index];
 			else
 				return ;
 		}
 
-		Type& at( size_t index ) {
+		T& at( size_t index ) {
 			if ( index < this->Size )
 				return elements[index];
 			else
 				return ;
 		}
 
-		const Type& operator[] ( size_t index ) const {
+		const T& operator[] ( size_t index ) const {
 			return elements[index];
 		}
 
-		Type& operator[] ( size_t index ) {
+		T& operator[] ( size_t index ) {
 			return elements[index];
 		}
 
@@ -150,12 +150,12 @@ namespace ds {
 		// -- Iteratoren --
 		// Iterator zeigt auf Anfang
 		iterator begin() const {
-			return iterator( const_cast<Type*>(&elements[0]) ) ;
+			return iterator( const_cast<T*>(&elements[0]) ) ;
 		}
 
 		// Iterator zeigt auf den Platz hinter dem letzten Element
 		iterator end() const {
-			return iterator( const_cast<Type*>(&elements[num_elements]) );
+			return iterator( const_cast<T*>(&elements[num_elements]) );
 		}
 	};
 

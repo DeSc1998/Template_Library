@@ -9,8 +9,20 @@ void stack_test();
 void list_test();
 void vector_test();
 
+
+
 int main() {
 
+
+
+	stack_test();
+	
+	std::cout << "\n\n\n";
+	
+	list_test();
+	
+	std::cout << "\n\n\n";
+	
 	vector_test();
 
 	std::cin.get();
@@ -32,7 +44,7 @@ void stack_test() {
 
 	// iterator test (passed)
 	for (auto iter = st.begin(); iter != st.end(); ++iter)
-		std::cout << iter->value << ", ";
+		std::cout << *iter << ", ";
 
 	std::cout << "\n\n";
 
@@ -49,8 +61,8 @@ void stack_test() {
 		st.push(i * 2);
   
 	// foreach test (passed)
-	for (auto node : st)
-		std::cout << node.value << ", ";
+	for (auto value : st)
+		std::cout << value << ", ";
 }
 
 void list_test() {
@@ -156,7 +168,7 @@ void vector_test() {
 	std::cout << '\n';
 
 	// insertion beyond default size
-	for ( size_t i = 0; i < 51; i++ ) {
+	for ( int i = 0; i < 51; i++ ) {
 		vec.push_back( i*2 );
 	}
 

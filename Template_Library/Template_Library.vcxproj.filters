@@ -66,5 +66,8 @@
     <ClInclude Include="container\vector.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="container\block.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

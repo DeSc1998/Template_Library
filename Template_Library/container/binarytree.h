@@ -10,12 +10,12 @@
 
 namespace ds {
 
-	template < typename Type >
+	template < typename T >
 	class binarytree {
 
-		std::less<Type> compare;
+		std::less<T> compare;
 
-		using node_type = duo_node<Type>;
+		using node_type = duo_node<T>;
 
 		unsigned int  num_elem = 0;
 		std::shared_ptr<node_type> root;

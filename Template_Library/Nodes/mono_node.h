@@ -5,18 +5,18 @@
 
 namespace ds {
 
-	template < typename Type >
+	template < typename T >
 	class mono_node {
 	public:
-		Type value{};
+		T value{};
 		mono_node* next = nullptr;
 
 
 		mono_node() = default;
 
-		mono_node( const Type& t ) : value(t) {}
+		mono_node( const T& t ) : value(t) {}
 
-		mono_node( const Type& t, const_pointer<mono_node> n ) : value(t), next(n) {}
+		mono_node( const T& t, const_pointer<mono_node> n ) : value(t), next(n) {}
 
 		mono_node( const mono_node& node ) {
 			value = node.value;

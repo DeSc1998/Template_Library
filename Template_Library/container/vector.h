@@ -7,8 +7,8 @@
 namespace ds {
 
 	template <
-		typename Type,
-		typename Manager = data_manager<Type> 
+		typename T,
+		typename Manager = data_manager<T> 
 	>
 	class vector {
 	public:
@@ -16,81 +16,95 @@ namespace ds {
 
 		using iterator = typename Manager::iterator;
 	private:
-		size_t last_elem = 0;
 		Manager data;
+		iterator last = data.begin();
 
 	public:
 		vector() = default;
 
-		vector( const value_type& val ) {
+		vector( const value_type& val ) : data() {
 			data[0] = val;
+			++last;
 		}
 
-		vector( value_type&& val ) {
+		vector( value_type&& val ) : data() {
 			data[0] = std::move(val);
+			++last;
 		}
 
 
 		void push_back( const value_type& val ) {
-			if ( last_elem + 1 == data.size() )
-				data.resize( data.size() + 10 );
+			if (last == data.end()) {
+				data.expand_by(1);
+				++(--last);
+			}
 
-			data[last_elem++] = val;
+			*(last++) = val;
 		}
 
 		void push_back( value_type&& val ) {
-			if ( last_elem + 1 == data.size() )
-				data.resize( data.size() + 10 );
+			if (last == data.end()) {
+				data.expand_by(1);
+				++(--last);
+			}
 
-			data[last_elem++] = std::move(val);
+			*(last++) = std::move(val);
 		}
 
 		void push_front( const value_type& val ) {
-			if (last_elem + 1 == data.size())
-				data.resize(data.size() + 10);
+			if (last == data.end()) {
+				data.expand_by(1);
+				++(--last);
+			}
 
-			shift_at();
+			shift_at(0);
 			data[0] = val;
-			++last_elem;
+			++last;
 		}
 
 		void push_front( value_type&& val ) {
-			if (last_elem + 1 == data.size())
-				data.resize(data.size() + 10);
+			if (last == data.end()) {
+				data.expand_by(1);
+				++(--last);
+			}
 
-			shift_at();
+			shift_at(0);
 			data[0] = std::move(val);
-			++last_elem;
+			++last;
 		}
 
 		void insert( const value_type& val, size_t index = 0 ) {
-			if (last_elem + 1 == data.size())
-				data.resize(data.size() + 10);
+			if (last == data.end()) {
+				data.expand_by(1);
+				++(--last);
+			}
 
 			shift_at(index);
 			data[index] = val;
-			++last_elem;
+			++last;
 		}
 
 		void insert(value_type&& val, size_t index = 0) {
-			if (last_elem + 1 == data.size())
-				data.resize(data.size() + 10);
+			if (last == data.end()) {
+				data.expand_by(1);
+				++(--last);
+			}
 
 			shift_at(index);
 			data[index] = std::move(val);
-			++last_elem;
+			++last;
 		}
 
-		void shift_at( size_t index = 0, long long amount = 1 ) {
-			if ( data[0] != value_type() ) {
+		void shift_at( size_t index, long long amount = 1 ) {
+			if ( data[0] != value_type() && amount != 0 ) {
 				if (amount > 0) {
-					for (size_t i = last_elem; i > index; i--)
-						data[i + amount] = std::move( data[i] );
+					for (size_t i = last - begin(); i > index; i--)
+						data[i + (size_t)amount] = std::move( data[i] );
 
-					data[index + amount] = std::move( data[index] );
+					data[index + (size_t)amount] = std::move( data[index] );
 				}
-				else if (amount < 0) {
-					for (size_t i = index; i < last_elem; i++)
+				else {
+					for (size_t i = index; i < last - begin(); i++)
 						data[i] = std::move( data[i - amount] );
 				}
 			}
@@ -106,17 +120,21 @@ namespace ds {
 
 		void erase_at( size_t index ) {
 			shift_at(index, -1);
-			--last_elem;
+			--last;
 		}
 
 		void erase( const value_type& val ) {
-			for (size_t i = 0; i <= last_elem; i++ ) {
+			for (size_t i = 0; i <= last - begin(); i++ ) {
 				if ( data[i] == val ) {
 					shift_at(i, -1);
-					--last_elem;
+					--last;
 					break;
 				}
 			}
+		}
+
+		size_t size() const noexcept {
+			return last - begin();
 		}
 
 
@@ -129,11 +147,11 @@ namespace ds {
 		}
 
 		iterator end() {
-			return iterator( &data[last_elem] );
+			return last;
 		}
 
 		iterator end() const {
-			return iterator( &data[last_elem] );
+			return last;
 		}
 	};
 
