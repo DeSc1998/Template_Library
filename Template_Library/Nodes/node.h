@@ -108,11 +108,6 @@ namespace ds {
 				}
 
 
-				virtual iterator_base& operator ++ () = 0;
-				virtual iterator_base& operator ++ (int) = 0;
-				virtual iterator_base& operator -- () { return *this; }
-				virtual iterator_base& operator -- (int) { return *this; }
-
 				virtual ~iterator_base() {};
 		};
 
@@ -135,10 +130,10 @@ namespace ds {
 			traverse_iterator( node_type* p ) : iterator_base_type(p) {}
 
 			traverse_iterator( const traverse_iterator& iter ) :
-				iterator_base_type( reinterpret_cast<const iterator_base_type&>(iter) ) {}
+				iterator_base_type( static_cast<const iterator_base_type&>(iter) ) {}
 
 			traverse_iterator( traverse_iterator&& iter ) : 
-				iterator_base_type( reinterpret_cast<iterator_base_type&&>(iter) ) {}
+				iterator_base_type( static_cast<iterator_base_type&&>(iter) ) {}
 
 
 			traverse_iterator& operator = ( const traverse_iterator& iter ) {
@@ -147,13 +142,13 @@ namespace ds {
 			}
 
 
-			iterator_base_type& operator ++ () override {
+			iterator_base_type& operator ++ () {
 				if (this->ptr != nullptr)
 					this->ptr = this->ptr->next;
 				return *this;
 			}
 
-			iterator_base_type& operator ++ (int) override {
+			iterator_base_type& operator ++ (int) {
 				if (this->ptr != nullptr)
 					this->ptr = this->ptr->next;
 				return *this;
@@ -175,10 +170,10 @@ namespace ds {
 			bi_traverse_iterator( node_type* p ) : iterator_base_type(p) {}
 
 			bi_traverse_iterator( const bi_traverse_iterator& iter ) :
-				iterator_base_type( reinterpret_cast<const iterator_base_type&>(iter) ) {}
+				iterator_base_type( static_cast<const iterator_base_type&>(iter) ) {}
 
 			bi_traverse_iterator( bi_traverse_iterator&& iter ) :
-				iterator_base_type( reinterpret_cast<iterator_base_type&&>(iter) ) {}
+				iterator_base_type( static_cast<iterator_base_type&&>(iter) ) {}
 
 
 			bi_traverse_iterator& operator = (const bi_traverse_iterator& iter) {
@@ -187,25 +182,25 @@ namespace ds {
 			}
 
 
-			iterator_base_type& operator ++ () override {
+			iterator_base_type& operator ++ () {
 				if ( this->ptr != nullptr )
 					this->ptr = this->ptr->next;
 				return *this;
 			}
 
-			iterator_base_type& operator ++ (int) override {
+			iterator_base_type& operator ++ (int) {
 				if (this->ptr != nullptr)
 					this->ptr = this->ptr->next;
 				return *this;
 			}
 
-			iterator_base_type& operator -- () override {
+			iterator_base_type& operator -- () {
 				if (this->ptr != nullptr)
 					this->ptr = this->ptr->prev;
 				return *this;
 			}
 
-			iterator_base_type& operator -- (int) override {
+			iterator_base_type& operator -- (int) {
 				if (this->ptr != nullptr)
 					this->ptr = this->ptr->prev;
 				return *this;
