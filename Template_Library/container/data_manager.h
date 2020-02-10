@@ -89,7 +89,7 @@ namespace ds {
 
 		value_type& operator [] ( size_t index ) {
 			if ( index >= Size * block_type::num_elements )
-				expand_by(1);
+				expand_by( (index - Size * block_type::num_elements) );
 
 			const auto block_index = index / block_type::num_elements;
 			const auto value_index = index % block_type::num_elements;
@@ -138,23 +138,19 @@ namespace ds {
 		constexpr size_t size() const noexcept { return end() - begin(); }
 
 		constexpr iterator begin() const noexcept {
-			return iterator( elems[0].begin(), std::addressof(elems[0]) );
+			return elems[0].begin();
 		}
 
 		constexpr iterator begin() noexcept {
-			return iterator( elems[0].begin(), std::addressof(elems[0]) );
+			return elems[0].begin();
 		}
 		
-		constexpr iterator rend() const noexcept {
-			return reverse_iterator( 
-				iterator( elems[0].rend(), std::addressof(elems[0]) ) 
-			);
+		constexpr reverse_iterator rend() const noexcept {
+			return elems[0].rend();
 		}
 
-		constexpr iterator rend() noexcept {
-			return reverse_iterator(
-				iterator( elems[0].rend(), std::addressof(elems[0]) )
-			);
+		constexpr reverse_iterator rend() noexcept {
+			return elems[0].rend();
 		}
 
 		constexpr iterator iterator_at( size_t index ) noexcept {
@@ -165,20 +161,28 @@ namespace ds {
 			return begin() + index;
 		}
 
+		constexpr reverse_iterator riterator_at(size_t index) noexcept {
+			return rbegin() + index;
+		}
+
+		constexpr reverse_iterator riterator_at(size_t index) const noexcept {
+			return rbegin() + index;
+		}
+
 		constexpr iterator end() const noexcept {
-			return iterator( elems[Size - 1].end(), std::addressof(elems[Size - 1]) );
+			return elems[Size - 1].end();
 		}
 
 		constexpr iterator end() noexcept {
-			return iterator( elems[Size - 1].end(), std::addressof(elems[Size - 1]) );
+			return elems[Size - 1].end();
 		}
 		
-		constexpr iterator rbegin() const noexcept {
-			return iterator( elems[Size - 1].rbegin(), std::addressof(elems[Size - 1]) );
+		constexpr reverse_iterator rbegin() const noexcept {
+			return elems[Size - 1].rbegin();
 		}
 
-		constexpr iterator rbegin() noexcept {
-			return iterator( elems[Size - 1].rbegin(), std::addressof(elems[Size - 1]) );
+		constexpr reverse_iterator rbegin() noexcept {
+			return elems[Size - 1].rbegin();
 		}
 	};
 
@@ -273,13 +277,13 @@ namespace ds {
 				pos = iterator( std::addressof(elems[iter_index]) );
 			}
 
-			if ( *Begin != node_type() && pos != Begin ) {
+			if ( *Begin.get() != node_type() && pos != Begin ) {
 				iterator prev = pos;
 				--prev;
 				link_nodes( prev, iterator( std::addressof(elems[index]) ) );
 				link_nodes( iterator( std::addressof(elems[index]) ), pos );
-			} else if ( pos == Begin && *Begin != node_type() ) {
-				link_nodes( elems[index], *pos );
+			} else if (pos == Begin && *Begin.get() != node_type()) {
+				link_nodes( elems[index], *pos.get() );
 				Begin = iterator( std::addressof(elems[index]) );
 				Begin->prev = nullptr;
 			}
@@ -318,7 +322,7 @@ namespace ds {
 				--prev; ++next;
 				if ( !link_nodes(prev, next) && prev.get() == nullptr )
 					Begin = next;
-				*pos = node_type();
+				*pos.get() = node_type();
 				return true;
 			}
 			return false;

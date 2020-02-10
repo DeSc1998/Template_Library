@@ -98,13 +98,13 @@ namespace ds {
 		void shift_at( size_t index, long long amount = 1 ) {
 			if ( data[0] != value_type() && amount != 0 ) {
 				if (amount > 0) {
-					for (size_t i = last - begin(); i > index; i--)
-						data[i + (size_t)amount] = std::move( data[i] );
+					for (int i = last - begin(); i > (int)index; i--)
+						data[i + amount] = std::move( data[i] );
 
-					data[index + (size_t)amount] = std::move( data[index] );
+					data[index + amount] = std::move( data[index] );
 				}
 				else {
-					for (size_t i = index; i < last - begin(); i++)
+					for (int i = index; i < last - begin(); i++)
 						data[i] = std::move( data[i - amount] );
 				}
 			}
@@ -124,7 +124,7 @@ namespace ds {
 		}
 
 		void erase( const value_type& val ) {
-			for (size_t i = 0; i <= last - begin(); i++ ) {
+			for (int i = 0; i <= last - begin(); i++ ) {
 				if ( data[i] == val ) {
 					shift_at(i, -1);
 					--last;
@@ -154,25 +154,5 @@ namespace ds {
 			return last;
 		}
 	};
-
-
-	template < typename T >
-	std::ostream& operator << ( std::ostream& stream, const vector<T>& vec ) {
-		auto iter = vec.begin();
-
-		while ( iter != vec.end() ) {
-			if ( iter == vec.begin() )
-				stream << '[';
-
-			stream << *iter;
-
-			if (++iter == vec.end())
-				stream << ']';
-			else
-				stream << ';';
-		}
-
-		return stream;
-	}
 
 }

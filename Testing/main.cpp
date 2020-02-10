@@ -1,14 +1,11 @@
 
 #include <iostream>
 
-#include "container/stack.h"
-#include "container/list.h"
-#include "container/vector.h"
+#include "container.h"
 
 void stack_test();
 void list_test();
 void vector_test();
-
 
 
 int main() {
@@ -57,12 +54,14 @@ void stack_test() {
 	// resize test (passed)
 	//( inserting more elements than the default size )
 	std::cout << "\n\n";
-	for (int i = 1; i < 51; i++)
+	for (int i = 1; i < 701; i++)
 		st.push(i * 2);
   
 	// foreach test (passed)
 	for (auto value : st)
 		std::cout << value << ", ";
+
+	std::cout << "\n" << st << "\n";
 }
 
 void list_test() {
@@ -101,8 +100,8 @@ void list_test() {
 
 	// foreach test (passed)
 	std::cout << '\n';
-	for (auto node : list)
-		std::cout << node.value << ", ";
+	for (auto val : list)
+		std::cout << val << ", ";
 
 	std::cout << '\n' << list.size() << '\n' << '\n';
 
