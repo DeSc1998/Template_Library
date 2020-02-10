@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="container.h" />
     <ClInclude Include="container\binarytree.h" />
     <ClInclude Include="container\block.h" />
     <ClInclude Include="container\data_manager.h" />

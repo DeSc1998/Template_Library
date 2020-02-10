@@ -5,44 +5,58 @@
 #include <iterator>
 #include <algorithm>
 
+#include "../Types.h"
+
 namespace ds {
+
+	template < typename T, size_t S >
+	class block_iterator;
+
+	template < typename T, size_t S >
+	class reverse_block_iterator;
 
 	template < typename T, size_t Block_size = 0x800 >
 	class block {
 	public:
-		static constexpr size_t num_elements   = Block_size / sizeof(T);
-		static constexpr size_t Size       = num_elements * sizeof(T);
+		static constexpr size_t num_elements = Block_size / sizeof(T);
+		static constexpr size_t Size         = num_elements * sizeof(T);
 		
 		using value_type      = T;
 		using reference       = value_type&;
 		using const_reference = const value_type&;
 		using pointer         = value_type*;
 
-		using array_type = std::array<value_type, num_elements>;
-		using iterator   = typename array_type::iterator;
+		using const_pointer = const_pointer<T>;
+
+		//using array_type       = std::array<value_type, num_elements>;
+		using iterator         = block_iterator<T, Size>;
+		using reverse_iterator = reverse_block_iterator<T, Size>;
+
+		friend class block_iterator<T, Size>;
+		friend class reverse_block_iterator<T, Size>;
 
 	private:
-		std::unique_ptr<array_type> elems;
+		std::unique_ptr<value_type[]> elems;
 
 	public:
 		block() = default;
 
 		block( const value_type& val ) : 
-			elems( std::make_unique<array_type>() ) 
+			elems( std::make_unique<value_type[]>( num_elements ) ) 
 		{
-			std::fill( elems->begin(), elems->end(), val );
+			std::fill( elems.get(), elems.get() + num_elements, val );
 		}
 
 		block( const block& other ) :
-			elems( std::make_unique<array_type>() ) 
+			elems( std::make_unique<value_type[]>( num_elements ) ) 
 		{
-			std::copy( other.elems->begin(), other.elems->end(), elems->begin() );
+			std::copy( elems.get(), elems.get() + num_elements, elems.get() );
 		}
 
 		block( block&& other ) : elems( std::move(other.elems) ) {}
 
 		block& operator = (const block& other) {
-			std::copy( other.elems->begin(), other.elems->end(), elems->begin() );
+			std::copy( other.elems.get(), other.elems.get() + num_elements, elems.get() );
 			return *this;
 		}
 
@@ -51,18 +65,27 @@ namespace ds {
 			return *this;
 		}
 
+	private:
+		const_pointer get_begin() const noexcept {
+			return &elems[0];
+		}
 
+		const_pointer get_rbegin() const noexcept {
+			return &elems[num_elements - 1];
+		}
+
+	public:
 		reference operator [] (size_t index) {
-			return (*elems)[index];
+			return elems[index];
 		}
 
 		const_reference operator [] (size_t index) const {
-			return (*elems)[index];
+			return elems[index];
 		}
 
 
 		constexpr auto size() const noexcept {
-			return elems->size();
+			return num_elements;
 		}
 
 		static constexpr auto block_size() noexcept {
@@ -71,101 +94,105 @@ namespace ds {
 
 
 		constexpr auto begin() noexcept {
-			return elems->begin();
+			return iterator(0, this);
 		}
 		
 		constexpr auto begin() const noexcept {
-			return elems->begin();
+			return iterator(0, this);
 		}
 
 		constexpr auto rbegin() noexcept {
-			return elems->rbegin();
+			return reverse_iterator(0, this);
 		}
 
 		constexpr auto rbegin() const noexcept {
-			return elems->rbegin();
+			return reverse_iterator(0, this);
 		}
 
 		constexpr auto end() noexcept {
-			return elems->end();
+			return iterator(num_elements, this);
 		}
 
 		constexpr auto end() const noexcept {
-			return elems->end();
+			return iterator(num_elements, this);
 		}
 
 		constexpr auto rend() noexcept {
-			return elems->rend();
+			return reverse_iterator(num_elements, this);
 		}
 
 		constexpr auto rend() const noexcept {
-			return elems->rend();
+			return reverse_iterator(num_elements, this);
 		}
 	};
 
 
-	template < typename T, size_t Size >
+	template < typename T, size_t S >
 	class block_iterator {
 	public:
+		using block_type      = block<T, S>;
+		using iterator_type   = typename block_type::pointer;
+		using size_type       = size_t;
+
+		// iterator types
 		using iterator_category = std::random_access_iterator_tag;
+		using value_type        = typename block_type::value_type;
+		using reference         = typename block_type::reference;
+		using const_reference   = typename block_type::const_reference;
+		using pointer           = typename block_type::value_type*;
+		using difference_type   = ptrdiff_t;
 
-		using block_type = block<T, Size>;
+		friend class block<T, S>;
 
-		using Iter            = typename block_type::iterator;
-		using value_type      = typename block_type::value_type;
-		using reference       = typename block_type::reference;
-		using const_reference = typename block_type::const_reference;
-		using pointer         = typename block_type::value_type*;
-		using difference_type = ptrdiff_t;
-		
+		static constexpr size_t size = block_type::num_elements;
 
 	private:
-		Iter block_pos;
-		block_type* block = nullptr;
+		size_type offset;
+		iterator_type Begin;
+		block_type* block_pos = nullptr;
+
 
 	public:
 		block_iterator() = default;
 
-		block_iterator( Iter iter, block_type* ptr) :
-			block_pos(iter),
-			block(ptr)
-		{}
-
-		block_iterator(const block_iterator& iter) :
-			block_pos(iter.block_pos),
-			block(iter.block)
-		{}
-
-		block_iterator( block_iterator&& iter ) :
-			block_pos( std::move(iter.block_pos) ),
-			block( std::move(iter.block) )
-		{}
-
-		operator std::reverse_iterator<block_iterator>() {
-			return std::reverse_iterator<block_iterator>( block_iterator(block_pos, block) );
+		block_iterator( size_type off, block_type* ptr) :
+			offset(off % size),
+			block_pos(ptr + off / size)
+		{
+			Begin = block_pos->get_begin();
 		}
 
-		block_iterator& operator = ( const block_iterator& other ) noexcept {
-			block_pos = other.block_pos;
-			block = other.block;
+		block_iterator(const block_iterator&) = default;
+		block_iterator(block_iterator&&) = default;
+		block_iterator& operator = (const block_iterator&) = default;
 
-			return *this;
+		explicit operator reverse_block_iterator<T, S>() {
+			return reverse_block_iterator<T, S>( size - offset, block_pos );
 		}
+
 
 		reference operator * () {
-			return *block_pos;
+			Begin = block_pos->get_begin();
+			return *(Begin + offset);
 		}
 
 		const_reference operator * () const {
-			return *block_pos;
+			Begin = block_pos->get_begin();
+			return *(Begin + offset);
+		}
+
+		reference operator [] (size_type idx) {
+			return *(*this + idx);
+		}
+
+		const_reference operator [] (size_type idx) const {
+			return *(*this + idx);
 		}
 
 		block_iterator& operator ++ () {
-			if ( block_pos + 1 == block->end() ) {
-				++block;
-				block_pos = block->begin();
-			} else {
+			if ( ++offset == size ) {
 				++block_pos;
+				offset = 0;
 			}
 
 			return *this;
@@ -173,23 +200,14 @@ namespace ds {
 
 		block_iterator operator ++ (int) {
 			auto prev = *this;
-
-			if ( block_pos + 1 == block->end() ) {
-				++block;
-				block_pos = block->begin();
-			} else {
-				++block_pos;
-			}
-
+			++(*this);
 			return prev;
 		}
 
 		block_iterator& operator -- () {
-			if ( block_pos == block->begin() ) {
-				--block;
-				block_pos = block->end() - 1;
-			} else {
+			if ( --offset >= size ) {
 				--block_pos;
+				offset = 0;
 			}
 
 			return *this;
@@ -197,57 +215,51 @@ namespace ds {
 
 		block_iterator operator -- (int) {
 			auto prev = *this;
-
-			if ( block_pos == block->begin() ) {
-				--block;
-				block_pos = block->end() - 1;
-			} else {
-				--block_pos;
-			}
-
+			--(*this);
 			return prev;
 		}
 
-		constexpr block_iterator operator + ( size_t val ) const noexcept {
-			const auto block_off = val / block->size();
-			const auto value_off = val % block->size();
-
-			return block_iterator( block_pos + value_off, block + block_off );
+		constexpr block_iterator operator + ( size_type val ) const noexcept {
+			const auto block_off = val / size;
+			const auto value_off = val % size;
+			//const auto temp = block_iterator(offset + value_off, block_pos + block_off);
+			
+			return block_iterator(offset + value_off, block_pos + block_off);
+			//return block_type::is_in_block(temp) ?
+			//	temp :
+			//	block_iterator(temp.offset - size, temp.block_pos + 1);
 		}
 		
-		constexpr block_iterator operator - ( size_t val ) const noexcept {
-			const auto block_off = val / block->size();
-			const auto value_off = val % block->size();
+		constexpr block_iterator operator - ( size_type val ) const noexcept {
+			const auto block_off = val / size;
+			const auto value_off = val % size;
+			//const auto temp = block_iterator(offset - value_off, block_pos - block_off);
 
-			return block_iterator( block_pos - value_off, block - block_off );
+			return block_iterator(offset - value_off, block_pos - block_off);
+			//return block_type::is_in_block(temp) ? 
+			//	temp :
+			//	block_iterator(temp.offset + size, temp.block_pos - 1);
 		}
 
-		constexpr difference_type operator - ( const block_iterator& other ) const {
-			const auto front_dist = std::distance( block_pos, block->end() );
-			const auto back_dist = std::distance( other.block->begin(), other.block_pos );
-			const auto middle_dist = block != other.block ? 
-				(std::distance( other.block, block ) - 1) * block->size() : 0;
+		constexpr difference_type operator - ( const block_iterator& other ) const noexcept {
+			const auto front_dist = size - offset;
+			const auto back_dist = other.offset;
+			const auto middle_dist = (std::distance( other.block_pos, block_pos ) - 1) * size;
 
 			return front_dist + back_dist + middle_dist;
 		}
 
 
-		block_iterator& operator += ( size_t val ) noexcept {
-			block     += val / block->size();
-			block_pos += val % block->size();
-
-			return *this;
+		block_iterator& operator += ( size_type val ) noexcept {
+			return *this = *this + val;
 		}
 
-		block_iterator& operator -= ( size_t val ) noexcept {
-			block     -= val / block->size();
-			block_pos -= val % block->size();
-
-			return *this;
+		block_iterator& operator -= ( size_type val ) noexcept {
+			return *this = *this - val;
 		}
 
 		bool operator == ( const block_iterator& other ) const noexcept {
-			return block_pos == other.block_pos && block == other.block;
+			return offset == other.offset && block_pos == other.block_pos;
 		}
 
 		bool operator != ( const block_iterator& other ) const noexcept {
@@ -256,7 +268,144 @@ namespace ds {
 	};
 
 	template < typename T , size_t S >
-	using reverse_block_iterator = std::reverse_iterator< block_iterator<T, S> >;
+	class reverse_block_iterator {
+	public:
+		using block_type    = block<T, S>;
+		using iterator_type = typename block_type::pointer;
+		using size_type     = size_t;
+
+		// iterator types
+		using iterator_category = std::random_access_iterator_tag;
+		using value_type        = typename block_type::value_type;
+		using reference         = typename block_type::reference;
+		using const_reference   = typename block_type::const_reference;
+		using pointer           = typename block_type::pointer;
+		using difference_type   = ptrdiff_t;
+
+		friend class block<T, S>;
+
+		static constexpr size_t size = block_type::num_elements;
+
+	private:
+		size_type offset;
+		iterator_type rBegin;
+		block_type* block_pos = nullptr;
+
+
+	public:
+		reverse_block_iterator() = default;
+
+		reverse_block_iterator(size_type off, block_type * ptr) :
+			offset(off % size),
+			block_pos(ptr - off / size)
+		{}
+
+		reverse_block_iterator(const reverse_block_iterator&) = default;
+		reverse_block_iterator(reverse_block_iterator&&) = default;
+		reverse_block_iterator& operator = (const reverse_block_iterator&) = default;
+
+		explicit operator block_iterator<T, S>() {
+			return block_iterator<T, S>(size - offset, block_pos);
+		}
+
+
+		reference operator * () {
+			rBegin = block_pos->get_rbegin();
+			return *(rBegin - offset);
+		}
+
+		const_reference operator * () const {
+			rBegin = block_pos->get_rbegin();
+			return *(rBegin - offset);
+		}
+
+		reference operator [] (size_type idx) {
+			return *(*this + idx);
+		}
+
+		const_reference operator [] (size_type idx) const {
+			return *(*this + idx);
+		}
+
+		reverse_block_iterator& operator ++ () {
+			if (++offset == size) {
+				--block_pos;
+				offset = 0;
+			}
+
+			return *this;
+		}
+
+		reverse_block_iterator operator ++ (int) {
+			auto prev = *this;
+			++(*this);
+			return prev;
+		}
+
+		reverse_block_iterator& operator -- () {
+			if (--offset >= size) {
+				++block_pos;
+				offset = size - 1;
+			}
+
+			return *this;
+		}
+
+		reverse_block_iterator operator -- (int) {
+			auto prev = *this;
+			--(*this);
+			return prev;
+		}
+
+		constexpr reverse_block_iterator operator + (size_type val) const noexcept {
+			const auto block_off = val / size;
+			const auto value_off = val % size;
+			//const auto temp = reverse_block_iterator(offset - value_off, block_pos - block_off);
+
+			return reverse_block_iterator(offset + value_off, block_pos - block_off);
+			//return block_type::is_in_block(temp) ?
+			//	temp :
+			//	reverse_block_iterator(temp.offset + size, temp.block_pos - 1);
+		}
+
+		constexpr reverse_block_iterator operator - (size_type val) const noexcept {
+			const auto block_off = val / size;
+			const auto value_off = val % size;
+			//const auto temp = reverse_block_iterator(offset + value_off, block_pos + block_off);
+
+			return reverse_block_iterator(offset - value_off, block_pos + block_off);
+			//return block_type::is_in_block(temp) ?
+			//	temp :
+			//	reverse_block_iterator(temp.offset - size, temp.block_pos + 1);
+		}
+
+		constexpr difference_type operator - (const reverse_block_iterator& other) const noexcept {
+			const auto front_dist = size - offset;
+			const auto back_dist = other.offset;
+			const auto middle_dist = block_pos != other.block_pos ?
+				(std::distance(other.block_pos, block_pos) - 1) * size :
+				0;
+
+			return front_dist + back_dist + middle_dist;
+		}
+
+
+		reverse_block_iterator& operator += (size_type val) noexcept {
+			return *this = *this + val;
+		}
+
+		reverse_block_iterator& operator -= (size_type val) noexcept {
+			return *this = *this - val;
+		}
+
+		bool operator == (const reverse_block_iterator & other) const noexcept {
+			return offset == other.offset && block_pos == other.block_pos;
+		}
+
+		bool operator != (const reverse_block_iterator & other) const noexcept {
+			return !(*this == other);
+		}
+	};
 
 
 	template < typename T, size_t Size = block<T>::block_size() >

@@ -55,10 +55,16 @@ namespace ds {
 
 
 		void push( const value_type& t ) {
+			if (data.size() == num_elements)
+				data.expand_by(1);
+
 			data[num_elements++] = t;
 		}
 
 		void push( value_type&& t ) {
+			if (data.size() == num_elements)
+				data.expand_by(1);
+
 			data[num_elements++] = std::move( t );
 		}
 
@@ -84,19 +90,19 @@ namespace ds {
 		}
 
 		iterator end() const noexcept {
-			return data.begin();
+			return data.rend();
 		}
 
 		iterator begin() const noexcept {
-			return data.iterator_at( num_elements );
+			return data.rbegin() + (data.size() - num_elements);
 		}
 
 		iterator end() noexcept {
-			return data.begin();
+			return data.rend();
 		}
 
 		iterator begin() noexcept {
-			return data.iterator_at( num_elements );
+			return data.rbegin() + (data.size() - num_elements);
 		}
 	};
 

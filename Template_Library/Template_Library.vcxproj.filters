@@ -69,5 +69,8 @@
     <ClInclude Include="container\block.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="container.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

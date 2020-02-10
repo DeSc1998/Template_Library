@@ -106,23 +106,4 @@ namespace ds {
 		}
 	};
 
-	template < typename T >
-	std::ostream& operator << (std::ostream& out, const list<T>& l) {
-		auto iter = l.begin();
-
-		while ( iter != l.end() ) {
-			if (iter == l.begin())
-				out << '[';
-
-			out << iter->value;
-
-			if ( (iter++) == l.end() )
-				out << ']';
-			else
-				out << ';';
-		}
-
-		return out;
-	}
-
 }
