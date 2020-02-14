@@ -53,10 +53,11 @@ namespace ds {
 			elems = std::move(dm.elems);
 			Block_count = dm.Block_count;
 			Size = dm.Size;
+
 			return *this;
 		}
 
-
+		[[deprecated]]
 		void insert( const value_type& val ) {
 			auto iter = find_space();
 			if ( iter != end() )
@@ -73,6 +74,7 @@ namespace ds {
 			}
 		}
 
+		[[deprecated]]
 		void insert( value_type&& val ) {
 			auto iter = find_space();
 			if ( iter != end() )
@@ -161,11 +163,11 @@ namespace ds {
 			return begin() + index;
 		}
 
-		constexpr reverse_iterator riterator_at(size_t index) noexcept {
-			return rbegin() + index;
-		}
-
-		constexpr reverse_iterator riterator_at(size_t index) const noexcept {
+		constexpr reverse_iterator riterator_at( size_t index ) noexcept {
+			return rbegin() + index;			 			  
+		}										 			  
+												 			  
+		constexpr reverse_iterator riterator_at( size_t index ) const noexcept {
 			return rbegin() + index;
 		}
 

@@ -14,7 +14,8 @@ namespace ds {
 	public:
 		using value_type = typename Manager::value_type;
 
-		using iterator = typename Manager::iterator;
+		using iterator         = typename Manager::iterator;
+		using reverse_iterator = typename Manager::reverse_iterator;
 	private:
 		Manager data;
 		iterator last = data.begin();
@@ -138,20 +139,36 @@ namespace ds {
 		}
 
 
-		iterator begin() {
+		constexpr iterator begin() noexcept {
 			return data.begin();
 		}
 
-		iterator begin() const {
+		constexpr iterator begin() const noexcept {
 			return data.begin();
 		}
 
-		iterator end() {
+		constexpr reverse_iterator rend() noexcept {
+			return data.rend();
+		}
+
+		constexpr reverse_iterator rend() const noexcept {
+			return data.rend();
+		}
+
+		constexpr iterator end() noexcept {
 			return last;
 		}
 
-		iterator end() const {
+		constexpr iterator end() const noexcept {
 			return last;
+		}
+
+		constexpr reverse_iterator rbegin() noexcept {
+			return last - 1;
+		}
+
+		constexpr reverse_iterator rbegin() const noexcept {
+			return last - 1;
 		}
 	};
 
