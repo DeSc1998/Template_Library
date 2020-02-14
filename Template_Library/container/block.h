@@ -229,17 +229,10 @@ namespace ds {
 		}
 
 		constexpr difference_type operator - ( const block_iterator& other ) const noexcept {
-			//const auto front_dist = size - offset;
-			//const auto back_dist = other.offset;
-			//const auto middle_dist = block_pos != other.block_pos ?
-			//	(std::distance(other.block_pos, block_pos) - 1) * size :
-			//	0;
-
-			const auto offset_dist = other.offset - offset;
+			const auto offset_dist = offset - other.offset;
 			const auto block_diff = block_pos - other.block_pos;
 			const auto block_dist = block_diff * size;
 
-			//return front_dist + back_dist + middle_dist;
 			return offset_dist + block_dist;
 		}
 
@@ -363,17 +356,10 @@ namespace ds {
 		}
 
 		constexpr difference_type operator - (const reverse_block_iterator& other) const noexcept {
-			//const auto front_dist = size - offset;
-			//const auto back_dist = other.offset;
-			//const auto middle_dist = block_pos != other.block_pos ?
-			//	(std::distance(other.block_pos, block_pos) - 1) * size :
-			//	0;
-
-			const auto offset_dist = other.offset - offset;
-			const auto block_diff = block_pos - other.block_pos;
+			const auto offset_dist = offset - other.offset;
+			const auto block_diff = other.block_pos - block_pos;
 			const auto block_dist = block_diff * size;
 
-			//return front_dist + back_dist + middle_dist;
 			return offset_dist + block_dist;
 		}
 
