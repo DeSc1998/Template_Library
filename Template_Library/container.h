@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <utility>
 
 #include "container/mono_list.h"
 #include "container/list.h"
@@ -10,13 +11,48 @@
 
 namespace ds {
 
+	
+
+	template < typename T >
+	struct is_range_t {
+
+		template < typename >
+		struct SFINAE : std::true_type {};
+
+		// check for begin
+		template < typename U >
+		static auto test_begin( int ) ->
+			SFINAE< decltype( std::declval<U>().begin() ) >;
+
+		template < typename U >
+		static auto test_begin(long) ->
+			std::false_type;
+
+		// check for end
+		template < typename U >
+		static auto test_end( int ) ->
+			SFINAE< decltype( std::declval<U>().end() ) >;
+
+		template < typename U >
+		static auto test_end(long) ->
+			std::false_type;
+
+		using begin = decltype( test_begin<T>(0) );
+		using end = decltype( test_end<T>(0) );
+
+		static constexpr bool value = begin::value && end::value;
+	};
+
+	template < typename T >
+	constexpr bool is_range = is_range_t<T>::value;
+
+
 	template <
 		typename Container,
-		typename = std::enable_if_t<
-			std::is_class_v<Container>
-		>
+		typename = std::enable_if_t< is_range<Container> >
 	>
 	struct range {
+
 		using container_type = Container;
 		using iterator_type = typename container_type::iterator;
 
@@ -37,9 +73,7 @@ namespace ds {
 
 	template <
 		typename Container,
-		typename = std::enable_if_t<
-			std::is_class_v<Container>
-		>
+		typename = std::enable_if_t< is_range<Container> >
 	>
 	inline constexpr range<Container> make_range( const Container& con ) {
 		return range<Container>( con );

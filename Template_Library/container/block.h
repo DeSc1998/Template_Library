@@ -387,4 +387,13 @@ namespace ds {
 		return block<T, Size>(value);
 	}
 
+	template < typename T, size_t Size = block<T>::block_size() >
+	auto&& make_block_array(size_t length, const T& value = T{}) {
+		auto temp_array = std::make_unique<block<T, Size>>( length );
+		for (auto& b : temp_array)
+			b = block<T, Size>( value );
+
+		return std::move( temp_array );
+	}
+
 }
