@@ -1,7 +1,10 @@
 
 #include <iostream>
 
-#include "container.h"
+#include "container/stack.h"
+#include "container/list.h"
+#include "container/vector.h"
+#include "range.h"
 
 void stack_test();
 void list_test();

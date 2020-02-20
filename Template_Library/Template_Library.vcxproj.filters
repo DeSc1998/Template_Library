@@ -69,7 +69,7 @@
     <ClInclude Include="container\block.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="container.h">
+    <ClInclude Include="range.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

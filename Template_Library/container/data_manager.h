@@ -91,7 +91,7 @@ namespace ds {
 
 		value_type& operator [] ( size_t index ) {
 			if ( index >= Size * block_type::num_elements )
-				expand_by( (index - Size * block_type::num_elements) );
+				expand_by( index / block_type::num_elements - Size + 1 );
 
 			const auto block_index = index / block_type::num_elements;
 			const auto value_index = index % block_type::num_elements;

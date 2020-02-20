@@ -3,15 +3,8 @@
 #include <iostream>
 #include <utility>
 
-#include "container/mono_list.h"
-#include "container/list.h"
-#include "container/stack.h"
-#include "container/vector.h"
-
 
 namespace ds {
-
-	
 
 	template < typename T >
 	struct is_range_t {
@@ -47,6 +40,40 @@ namespace ds {
 	constexpr bool is_range = is_range_t<T>::value;
 
 
+	template < typename T >
+	struct is_reverse_range_t {
+
+		template < typename >
+		struct SFINAE : std::true_type {};
+
+		// check for begin
+		template < typename U >
+		static auto test_rbegin(int) ->
+			SFINAE< decltype(std::declval<U>().rbegin()) >;
+
+		template < typename U >
+		static auto test_rbegin(long) ->
+			std::false_type;
+
+		// check for end
+		template < typename U >
+		static auto test_rend(int) ->
+			SFINAE< decltype(std::declval<U>().rend()) >;
+
+		template < typename U >
+		static auto test_rend(long) ->
+			std::false_type;
+
+		using rbegin = decltype( test_rbegin<T>(0) );
+		using rend = decltype( test_rend<T>(0) );
+
+		static constexpr bool value = rbegin::value && rend::value && is_range<T>;
+	};
+
+	template < typename T >
+	constexpr bool is_reverse_range = is_reverse_range_t<T>::value;
+
+
 	template <
 		typename Container,
 		typename = std::enable_if_t< is_range<Container> >
@@ -54,7 +81,7 @@ namespace ds {
 	struct range {
 
 		using container_type = Container;
-		using iterator_type = typename container_type::iterator;
+		using iterator_type  = typename container_type::iterator;
 
 		iterator_type begin, end;
 
@@ -64,9 +91,32 @@ namespace ds {
 			begin(begin), end(end) 
 		{}
 
-		range( const Container& con ) :
+		range( const container_type& con ) :
 			begin( con.begin() ),
 			end( con.end() )
+		{}
+	};
+
+	template <
+		typename Container,
+		typename = std::enable_if_t< is_reverse_range<Container> >
+	>
+	struct reverse_range {
+
+		using container_type = Container;
+		using iterator_type  = typename container_type::reverse_iterator;
+
+		iterator_type rbegin, rend;
+
+		reverse_range() = default;
+
+		explicit reverse_range(iterator_type rbegin, iterator_type rend) :
+			rbegin(rbegin), rend(rend)
+		{}
+
+		reverse_range( const container_type& con ) :
+			rbegin( con.rbegin() ),
+			rend( con.rend() )
 		{}
 	};
 
@@ -80,10 +130,19 @@ namespace ds {
 	}
 
 	template <
+		typename Container,
+		typename = std::enable_if_t< is_reverse_range<Container> >
+	>
+	inline constexpr reverse_range<Container> make_reverse_range(
+		const Container& con
+	) {
+		return reverse_range<Container>( con );
+	}
+
+
+	template <
 		typename Con,
-		typename = std::enable_if_t<
-			std::is_constructible_v<range<Con>, Con>
-		>
+		typename = std::enable_if_t< is_range<Con> >
 	>
 	inline std::ostream& operator << ( std::ostream& stream, const Con& con )
 	{
