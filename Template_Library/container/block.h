@@ -9,13 +9,6 @@
 
 namespace ds {
 
-	template < typename T, size_t S >
-	class block_iterator;
-
-	template < typename T, size_t S >
-	class reverse_block_iterator;
-
-
 	template < typename T, size_t Block_size = 0x800 >
 	class block {
 	public:
@@ -29,11 +22,11 @@ namespace ds {
 
 		using const_pointer = const_pointer<T>;
 
-		using iterator         = block_iterator<T, Size>;
-		using reverse_iterator = reverse_block_iterator<T, Size>;
+		class block_iterator;
+		class reverse_block_iterator;
 
-		friend class block_iterator<T, Size>;
-		friend class reverse_block_iterator<T, Size>;
+		using iterator         = block_iterator;
+		using reverse_iterator = reverse_block_iterator;
 
 	private:
 		std::unique_ptr<value_type[]> elems;
@@ -67,11 +60,11 @@ namespace ds {
 
 	private:
 		const_pointer get_begin() const noexcept {
-			return &elems[0];
+			return elems.get();
 		}
 
 		const_pointer get_rbegin() const noexcept {
-			return &elems[num_elements - 1];
+			return elems.get() + (num_elements - 1);
 		}
 
 	public:
@@ -128,10 +121,10 @@ namespace ds {
 
 
 	template < typename T, size_t S >
-	class block_iterator {
+	class block<T, S>::block_iterator {
 	public:
-		using block_type      = block<T, S>;
-		using size_type       = size_t;
+		using block_type = block<T, S>;
+		using size_type  = size_t;
 
 		// iterator types
 		using iterator_category = std::random_access_iterator_tag;
@@ -141,18 +134,16 @@ namespace ds {
 		using pointer           = typename block_type::value_type*;
 		using difference_type   = ptrdiff_t;
 
-		friend class block<T, S>;
-
 		static constexpr size_t size = block_type::num_elements;
 
 	private:
-		size_type offset;
+		size_type offset = 0;
 		block_type* block_pos = nullptr;
 
 	public:
 		block_iterator() = default;
 
-		block_iterator( size_type off, block_type* ptr) :
+		constexpr block_iterator( size_type off, block_type* ptr) :
 			offset(off % size),
 			block_pos(ptr + (off / size))
 		{}
@@ -160,9 +151,10 @@ namespace ds {
 		block_iterator(const block_iterator&) = default;
 		block_iterator(block_iterator&&) = default;
 		block_iterator& operator = (const block_iterator&) = default;
+		block_iterator& operator = (block_iterator&&) = default;
 
-		explicit operator reverse_block_iterator<T, S>() {
-			return reverse_block_iterator<T, S>( size - offset, block_pos );
+		explicit operator block<T, S>::reverse_block_iterator() {
+			return block<T, S>::reverse_block_iterator( size - offset, block_pos );
 		}
 
 
@@ -252,10 +244,26 @@ namespace ds {
 		bool operator != ( const block_iterator& other ) const noexcept {
 			return !( *this == other );
 		}
+
+		bool operator <= ( const block_iterator& other ) const noexcept {
+			return ( offset <= other.offset && block_pos <= other.block_pos );
+		}
+
+		bool operator < (const block_iterator& other) const noexcept {
+			return (offset < other.offset && block_pos <= other.block_pos);
+		}
+
+		bool operator >= (const block_iterator& other) const noexcept {
+			return (offset >= other.offset && block_pos >= other.block_pos);
+		}
+
+		bool operator > (const block_iterator& other) const noexcept {
+			return (offset > other.offset && block_pos >= other.block_pos);
+		}
 	};
 
 	template < typename T , size_t S >
-	class reverse_block_iterator {
+	class block<T, S>::reverse_block_iterator {
 	public:
 		using block_type    = block<T, S>;
 		using size_type     = size_t;
@@ -268,18 +276,16 @@ namespace ds {
 		using pointer           = typename block_type::pointer;
 		using difference_type   = ptrdiff_t;
 
-		friend class block<T, S>;
-
 		static constexpr size_t size = block_type::num_elements;
 
 	private:
-		size_type offset;
+		size_type offset = 0;
 		block_type* block_pos = nullptr;
 
 	public:
 		reverse_block_iterator() = default;
 
-		reverse_block_iterator(size_type off, block_type * ptr) :
+		constexpr reverse_block_iterator(size_type off, block_type * ptr) :
 			offset(off % size),
 			block_pos(ptr - (off / size))
 		{}
@@ -287,9 +293,10 @@ namespace ds {
 		reverse_block_iterator(const reverse_block_iterator&) = default;
 		reverse_block_iterator(reverse_block_iterator&&) = default;
 		reverse_block_iterator& operator = (const reverse_block_iterator&) = default;
+		reverse_block_iterator& operator = (reverse_block_iterator&&) = default;
 
-		explicit operator block_iterator<T, S>() {
-			return block_iterator<T, S>(size - offset, block_pos);
+		explicit operator block<T, S>::block_iterator() {
+			return block<T, S>::block_iterator(size - offset, block_pos);
 		}
 
 
@@ -379,6 +386,22 @@ namespace ds {
 		bool operator != (const reverse_block_iterator & other) const noexcept {
 			return !(*this == other);
 		}
+
+		bool operator <= (const reverse_block_iterator& other) const noexcept {
+			return (offset <= other.offset && block_pos >= other.block_pos);
+		}
+
+		bool operator < (const reverse_block_iterator& other) const noexcept {
+			return (offset < other.offset && block_pos >= other.block_pos);
+		}
+
+		bool operator >= (const reverse_block_iterator& other) const noexcept {
+			return (offset >= other.offset && block_pos <= other.block_pos);
+		}
+
+		bool operator > (const reverse_block_iterator& other) const noexcept {
+			return (offset > other.offset&& block_pos <= other.block_pos);
+		}
 	};
 
 
@@ -389,7 +412,8 @@ namespace ds {
 
 	template < typename T, size_t Size = block<T>::block_size() >
 	auto&& make_block_array(size_t length, const T& value = T{}) {
-		auto temp_array = std::make_unique<block<T, Size>>( length );
+		auto temp_array = std::make_unique<block<T, Size>[]>( length );
+
 		for (auto& b : temp_array)
 			b = block<T, Size>( value );
 

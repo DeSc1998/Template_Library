@@ -17,8 +17,8 @@ namespace ds {
 		using const_reference = typename block_type::const_reference;
 		using pointer         = typename block_type::pointer;
 
-		using iterator         = block_iterator<value_type, block_type::block_size()>;
-		using reverse_iterator = reverse_block_iterator<value_type, block_type::block_size()>;
+		using iterator         = typename block_type::iterator;
+		using reverse_iterator = typename block_type::reverse_iterator;
 	private:
 		size_t Block_count = 10, Size = 0;
 		std::unique_ptr<block_type[]> elems = std::make_unique<block_type[]>( Block_count );
