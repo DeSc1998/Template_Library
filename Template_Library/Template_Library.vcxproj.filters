@@ -27,9 +27,6 @@
     <ClInclude Include="integer.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="Typelist.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="Nodes\duo_node.h">
       <Filter>Headerdateien\nodes</Filter>
     </ClInclude>
@@ -45,9 +42,6 @@
     <ClInclude Include="container\binarytree.h">
       <Filter>Headerdateien\container</Filter>
     </ClInclude>
-    <ClInclude Include="container\data_manager.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="container\list.h">
       <Filter>Headerdateien\container</Filter>
     </ClInclude>
@@ -57,20 +51,17 @@
     <ClInclude Include="container\stack.h">
       <Filter>Headerdateien\container</Filter>
     </ClInclude>
-    <ClInclude Include="container\tuple.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="math\vector.h">
+    <ClInclude Include="range.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="container\vector.h">
-      <Filter>Headerdateien</Filter>
+      <Filter>Headerdateien\container</Filter>
+    </ClInclude>
+    <ClInclude Include="container\data_manager.h">
+      <Filter>Headerdateien\container</Filter>
     </ClInclude>
     <ClInclude Include="container\block.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="range.h">
-      <Filter>Headerdateien</Filter>
+      <Filter>Headerdateien\container</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,4 +1,3 @@
-
 #include <iostream>
 
 #include "container/stack.h"
@@ -10,25 +9,20 @@ void stack_test();
 void list_test();
 void vector_test();
 
-
 int main() {
-
-
-
 	stack_test();
-	
+
 	std::cout << "\n\n\n";
-	
+
 	list_test();
-	
+
 	std::cout << "\n\n\n";
-	
+
 	vector_test();
 
 	std::cin.get();
 	return 0;
 }
-
 
 void stack_test() {
 	ds::stack<int> st;
@@ -59,7 +53,7 @@ void stack_test() {
 	std::cout << "\n\n";
 	for (int i = 1; i < 701; i++)
 		st.push(i * 2);
-  
+
 	// foreach test (passed)
 	for (auto value : st)
 		std::cout << value << ", ";
@@ -79,15 +73,15 @@ void list_test() {
 	list.insert(99);
 
 	// iterator test (passed)
-	for ( auto iter = list.begin(); iter != list.end(); ++iter ) {
+	for (auto iter = list.begin(); iter != list.end(); ++iter) {
 		std::cout << iter->value << ", ";
 	}
 	std::cout << '\n' << list.size() << '\n';
 
 	// erase test (passed)
-	list.erase( 0 );
-	list.erase( 10 );
-	list.erase( 15 );
+	list.erase(0);
+	list.erase(10);
+	list.erase(15);
 
 	// 2nd iterator test (passed)
 	std::cout << '\n';
@@ -99,7 +93,7 @@ void list_test() {
 	// resize test (passed)
 	//( inserting more elements than the default size )
 	for (int i = 0; i < 51; i++)
-		list.insert( i*2 );
+		list.insert(i * 2);
 
 	// foreach test (passed)
 	std::cout << '\n';
@@ -170,11 +164,11 @@ void vector_test() {
 	std::cout << '\n';
 
 	// insertion beyond default size
-	for ( int i = 0; i < 51; i++ ) {
-		vec.push_back( i*2 );
+	for (int i = 0; i < 51; i++) {
+		vec.push_back(i * 2);
 	}
 
-	for ( auto var : vec) {
+	for (auto var : vec) {
 		std::cout << var << ", ";
 	}
 	std::cout << '\n';
