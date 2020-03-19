@@ -19,7 +19,7 @@ namespace ds {
 		using const_reference = const value_type&;
 		using pointer = value_type*;
 
-		using const_pointer = const_pointer<T>;
+		using const_pointer = T* const;
 
 		class block_iterator;
 		class reverse_block_iterator;
@@ -244,7 +244,7 @@ namespace ds {
 		}
 
 		bool operator < (const block_iterator& other) const noexcept {
-			return (offset < other.offset && block_pos <= other.block_pos);
+			return (offset < other.offset&& block_pos <= other.block_pos);
 		}
 
 		bool operator >= (const block_iterator& other) const noexcept {
@@ -252,7 +252,7 @@ namespace ds {
 		}
 
 		bool operator > (const block_iterator& other) const noexcept {
-			return (offset > other.offset&& block_pos >= other.block_pos);
+			return (offset > other.offset && block_pos >= other.block_pos);
 		}
 	};
 
@@ -384,7 +384,7 @@ namespace ds {
 		}
 
 		bool operator < (const reverse_block_iterator& other) const noexcept {
-			return (offset < other.offset && block_pos >= other.block_pos);
+			return (offset < other.offset&& block_pos >= other.block_pos);
 		}
 
 		bool operator >= (const reverse_block_iterator& other) const noexcept {
@@ -392,7 +392,7 @@ namespace ds {
 		}
 
 		bool operator > (const reverse_block_iterator& other) const noexcept {
-			return (offset > other.offset&& block_pos <= other.block_pos);
+			return (offset > other.offset && block_pos <= other.block_pos);
 		}
 	};
 
