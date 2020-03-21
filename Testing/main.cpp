@@ -5,11 +5,8 @@
 
 
 int main() {
-	stack_test();
-
-	std::cout << "\n\n\n";
-
-	vector_test();
+	
+	test::integer();
 
 	std::cin.get();
 	return 0;

@@ -109,10 +109,10 @@ namespace ds {
 			}
 
 			digets.clear();
-			while (value != 0) {
+			do {
 				digets.emplace_back(value % Base);
 				value /= Base;
-			}
+			} while (value != 0);
 			distribute(*this);
 
 			return *this;
@@ -238,15 +238,32 @@ namespace ds {
 			}
 			else {
 				integer tmp;
-				auto min_max = std::minmax(digets.size(), n.digets.size());
-				size_t num_size = min_max.second;
-				size_t size = min_max.first;
+				auto [_, max] = std::minmax(digets.size(), n.digets.size());
+				size_t num_size = max;
 
 				tmp.digets.reserve(num_size + 1);
 				tmp.digets.resize(num_size);
 
-				for (size_t i = 0; i < size; i++)
-					tmp.digets[i] = digets[i] + n.digets[i];
+				auto this_iter = digets.begin();
+				auto other_iter = n.digets.begin();
+				auto temp_iter = tmp.digets.begin();
+
+				while (this_iter < digets.end() || other_iter < n.digets.end()) {
+					if (this_iter >= digets.end())
+						*temp_iter = *other_iter;
+					else if (other_iter >= n.digets.end())
+						*temp_iter = *this_iter;
+					else
+						*temp_iter = (*this_iter) + (*other_iter);
+
+					if (this_iter != digets.end())
+						++this_iter;
+
+					if (other_iter != n.digets.end())
+						++other_iter;
+
+					++temp_iter;
+				}
 
 				distribute(tmp);
 				return tmp;
@@ -286,26 +303,25 @@ namespace ds {
 		}
 
 		integer operator * (const integer& n) const {
-			integer tmp(0);
-			tmp.digets.reserve(digets.capacity());
-			tmp.digets.resize(digets.size());
-			size_t exp = 1;
+			integer tmp;
+			auto this_size = digets.size();
+			auto other_size = n.digets.size();
+			tmp.digets.reserve(digets.capacity() + n.digets.capacity());
+			tmp.digets.resize(this_size + other_size);
 
-			for (const auto c : n.digets) {
-				exp = 1;
-				for (size_t i = 0; i < tmp.digets.size(); i++) {
-					tmp.digets[i] += digets[i] * (c * exp);
+			std::fill(tmp.digets.begin(), tmp.digets.end(), 0);
+
+			for (size_t i = 0; i < this_size; ++i) {
+				for (size_t j = 0; j < other_size; ++j) {
+					tmp.digets[i + j] += digets[i] * n.digets[j];
 				}
-				exp *= Base;
 			}
+
+			tmp.is_negativ = is_negativ ^ n.is_negativ;
 
 			distribute(tmp);
 			return tmp;
 		}
-
-		//number operator / (const number& n) const {
-		//
-		//}
 
 	private:
 		template < size_t B >
@@ -330,13 +346,21 @@ namespace ds {
 	using int_256 = integer<256>;
 	using int_1024 = integer<1024>;
 
-	template < size_t Base >
+	/*template < size_t Base >
 	std::wostream& operator << (std::wostream& o, integer<Base>& n) {
 		return (o << static_cast<std::wstring>(n));
 	}
 
 	template < size_t Base >
 	std::ostream& operator << (std::ostream& o, integer<Base>& n) {
-		return (o << static_cast<std::string>(n));
+		auto s = static_cast<std::string>(n);
+		return o.write(s.c_str(), s.size());
+	}*/
+
+	template < size_t Base, typename T >
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>& str, const integer<Base>& n) {
+		auto s = static_cast<std::basic_string<T>>(n);
+		return str.write( s.c_str(), s.size() );
 	}
+
 }

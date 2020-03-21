@@ -1,7 +1,14 @@
 #pragma once
 
-void stack_test();
 
-void list_test();
+namespace test {
 
-void vector_test();
+	void stack();
+
+	void list();
+
+	void vector();
+
+	void integer();
+
+}
