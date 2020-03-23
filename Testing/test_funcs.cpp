@@ -184,6 +184,7 @@ namespace test {
 		ds::integer j = 10000;
 		ds::integer<16> k = j;
 		ds::integer<64> l = 200;
+		ds::Int str_test("10912");
 
 		i = 21;
 
@@ -191,6 +192,7 @@ namespace test {
 		std::cout << " j <10> = " << j << '\n';
 		std::cout << " j <32> = " << (ds::integer<32>)j << '\n';
 		std::cout << " k <16> = " << k << '\n';
+		std::cout << " str_test <10> = " << str_test << '\n';
 
 		// TODO: converiton from large to lower bases is currently brocken
 		std::cout << " l <64 -> 20> = " << (ds::integer<20>)k << '\n';

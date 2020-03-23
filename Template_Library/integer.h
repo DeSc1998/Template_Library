@@ -62,6 +62,26 @@ namespace ds {
 			distribute(*this);
 		}
 
+		integer(std::string_view str) {
+			using namespace std;
+			auto set = symbols.substr(0, Base);
+
+			for (auto c : str)
+				digets.emplace(begin(digets), set.find(c));
+
+			distribute(*this);
+		}
+
+		integer(std::wstring_view str) {
+			using namespace std;
+			auto set = symbols.substr(0, Base);
+
+			for (auto c : str)
+				digets.emplace(begin(digets), set.find(c));
+
+			distribute(*this);
+		}
+
 		integer(long long value, const std::wstring& s) : symbols(s) {
 			if (value < 0) {
 				value = -value;
@@ -256,6 +276,7 @@ namespace ds {
 					else
 						*temp_iter = (*this_iter) + (*other_iter);
 
+
 					if (this_iter != digets.end())
 						++this_iter;
 
@@ -331,20 +352,20 @@ namespace ds {
 	// numder types provided with a default set of symbols
 	using Int = integer<>;
 
-	using int_bi = integer<2>;
-	using int_qua = integer<4>;
-	using int_oct = integer<8>;
-	using int_dec = integer<>;
-	using int_hex = integer<16>;
-	using int_32 = integer<32>;
-	using int_max = integer<36>;
+	using Int_bi = integer<2>;
+	using Int_qua = integer<4>;
+	using Int_oct = integer<8>;
+	using Int_dec = integer<>;
+	using Int_hex = integer<16>;
+	using Int_32 = integer<32>;
+	using Int_max = integer<36>;
 
 	// for calculations recommanded only
 	// base exits default set of symbols
-	using int_64 = integer<64>;
-	using int_128 = integer<128>;
-	using int_256 = integer<256>;
-	using int_1024 = integer<1024>;
+	using Int_64 = integer<64>;
+	using Int_128 = integer<128>;
+	using Int_256 = integer<256>;
+	using Int_1024 = integer<1024>;
 
 	/*template < size_t Base >
 	std::wostream& operator << (std::wostream& o, integer<Base>& n) {
@@ -360,7 +381,7 @@ namespace ds {
 	template < size_t Base, typename T >
 	std::basic_ostream<T>& operator << (std::basic_ostream<T>& str, const integer<Base>& n) {
 		auto s = static_cast<std::basic_string<T>>(n);
-		return str.write( s.c_str(), s.size() );
+		return str.write(s.c_str(), s.size());
 	}
 
 }
