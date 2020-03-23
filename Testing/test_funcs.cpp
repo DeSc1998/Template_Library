@@ -167,6 +167,18 @@ namespace test {
 		std::cout << vec;
 	}
 
+	void iterator() {
+		ds::vector<int> v;
+
+		for (int i = 3; i < 15; ++i)
+			v.push_back(i * 3);
+
+		for (auto iter = v.begin(); iter != v.end(); ++iter) {
+			std::cout << *iter << ", ";
+			++(--iter);
+		}
+	}
+
 	void integer() {
 		ds::integer<32> i;
 		ds::integer j = 10000;

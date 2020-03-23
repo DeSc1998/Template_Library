@@ -189,7 +189,7 @@ namespace ds {
 		block_iterator& operator -- () {
 			if (--offset >= size) {
 				--block_pos;
-				offset = 0;
+				offset = size - 1;
 			}
 
 			return *this;

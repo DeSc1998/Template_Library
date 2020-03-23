@@ -9,6 +9,8 @@ namespace test {
 
 	void vector();
 
+	void iterator();
+
 	void integer();
 
 }

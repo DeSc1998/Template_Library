@@ -6,7 +6,7 @@
 
 int main() {
 	
-	test::integer();
+	test::iterator();
 
 	std::cin.get();
 	return 0;
