@@ -7,25 +7,27 @@
 #include <ostream>
 #include <math.h>
 
+#include "range.h"
+
 namespace ds {
 
 	template < size_t Base = 10 >
 	class integer {
 		bool is_negativ = false;
-		std::vector<size_t> digets;
+		std::vector<size_t> digits;
 		std::wstring symbols = L"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 		static void distribute(integer& n) {
 			size_t rest = 0;
 
-			for (auto&& m : n.digets) {
+			for (auto&& m : n.digits) {
 				m += rest;
 				rest = m / Base;
-				m = m % Base;
+				m %= Base;
 			}
 
 			if (rest > 0) {
-				n.digets.emplace_back(rest);
+				n.digits.emplace_back(rest);
 
 				if (rest >= Base)
 					distribute(n);
@@ -42,23 +44,23 @@ namespace ds {
 			}
 
 			while (value != 0) {
-				digets.emplace_back(value % Base);
+				digits.emplace_back(value % Base);
 				value /= Base;
 			}
 		}
 
 		template < size_t Size >
 		integer(size_t(&value)[Size]) {
-			digets.reserve(Size);
+			digits.reserve(Size);
 			for (int i = 0; i < Size; i++)
-				digets[i] = value[i];
+				digits[i] = value[i];
 
 			distribute(*this);
 		}
 
 		integer(std::vector<size_t> v) {
 			using namespace std;
-			copy(begin(v), end(v), begin(digets));
+			copy(begin(v), end(v), begin(digits));
 			distribute(*this);
 		}
 
@@ -67,7 +69,7 @@ namespace ds {
 			auto set = symbols.substr(0, Base);
 
 			for (auto c : str)
-				digets.emplace(begin(digets), set.find(c));
+				digits.emplace(begin(digits), set.find(c));
 
 			distribute(*this);
 		}
@@ -77,7 +79,7 @@ namespace ds {
 			auto set = symbols.substr(0, Base);
 
 			for (auto c : str)
-				digets.emplace(begin(digets), set.find(c));
+				digits.emplace(begin(digits), set.find(c));
 
 			distribute(*this);
 		}
@@ -89,35 +91,35 @@ namespace ds {
 			}
 
 			while (value != 0) {
-				digets.emplace_back(value % Base);
+				digits.emplace_back(value % Base);
 				value /= Base;
 			}
 		}
 
 		template < size_t Size >
 		integer(size_t(&value)[Size], const std::wstring& s) : symbols(s) {
-			digets.reserve(Size);
+			digits.reserve(Size);
 			for (int i = 0; i < Size; i++)
-				digets[i] = value[i];
+				digits[i] = value[i];
 
 			distribute(*this);
 		}
 
 		integer(std::vector<size_t> v, const std::wstring& s) :
 			symbols(s),
-			digets(v)
+			digits(v)
 		{
 			distribute(*this);
 		}
 
 		integer(const integer& n) :
 			is_negativ(n.is_negativ),
-			digets(n.digets),
+			digits(n.digits),
 			symbols(n.symbols)
 		{ }
 
 		integer(integer&& n) noexcept {
-			digets = std::move(n.digets);
+			digits = std::move(n.digits);
 			symbols = std::move(n.symbols);
 			is_negativ = n.is_negativ;
 		}
@@ -128,9 +130,9 @@ namespace ds {
 				is_negativ = !is_negativ;
 			}
 
-			digets.clear();
+			digits.clear();
 			do {
-				digets.emplace_back(value % Base);
+				digits.emplace_back(value % Base);
 				value /= Base;
 			} while (value != 0);
 			distribute(*this);
@@ -140,8 +142,8 @@ namespace ds {
 
 		integer& operator = (const integer& value) {
 			using namespace std;
-			digets.clear();
-			copy(begin(value.digets), end(value.digets), begin(digets));
+			digits.clear();
+			copy(begin(value.digits), end(value.digits), begin(digits));
 			copy(begin(value.symbols), end(value.symbols), begin(symbols));
 			is_negativ = value.is_negativ;
 
@@ -150,8 +152,8 @@ namespace ds {
 		}
 
 		integer& operator = (integer&& value) noexcept {
-			digets.clear();
-			digets = std::move(value.digets);
+			digits.clear();
+			digits = std::move(value.digits);
 			symbols = std::move(value.symbols);
 			is_negativ = value.is_negativ;
 
@@ -164,28 +166,34 @@ namespace ds {
 		// implicit cast
 		template < size_t B >
 		operator integer<B>() const {
+			using std::log;
+			using std::exp;
+
 			integer<B> out;
-			out.digets.reserve(digets.capacity());
-			out.digets.resize(digets.size());
+			out.digits.reserve(digits.capacity());
+			out.digits.resize(digits.size());
 
-			const double base_factor = std::log((double)Base / (double)B);
-			double old_rest = 0.0;
+			const double base_factor = log((double)Base / (double)B);
 
-			for (size_t i = this->digets.size() - 1; i > 0; i--) {
-				double a_i = std::log((double)this->digets[i]);
-				double value = std::exp(i * base_factor + a_i);
-				out.digets[i] = (size_t)(value + old_rest * B);
-				old_rest = value + old_rest * B - out.digets[i];
-			}
+			auto converter = [index = digits.size() - 1, base_factor, rest = 0.0]
+			(size_t a_i) mutable->size_t {
+				// a_i * Base^i = b_i * B^i
+				// => b_i = a_i * (Base / B)^i
+				//    b_i = a_i * exp(i * ln(Base / B))
 
-			double value = std::exp(std::log((double)digets[0])) + old_rest * B;
-			out.digets[0] = (size_t)value;
+				auto b_i = exp(index-- * base_factor + log((double)a_i));
+				size_t new_value = (size_t)(b_i + rest * B);
+				rest = b_i + rest * B - new_value;
 
-			value -= (double)out.digets[0];
-			if (value >= 0.5) {
-				//std::cout << value << '\n';
-				out.digets[0] += (size_t)std::round(value);
-			}
+				if (index + 1 == 0 && rest >= 0.5) {
+					++new_value;
+					rest = 0.0;
+				}
+
+				return new_value;
+			};
+
+			std::transform(digits.rbegin(), digits.rend(), out.digits.rbegin(), converter);
 
 			integer<B>::distribute(out);
 
@@ -197,7 +205,7 @@ namespace ds {
 		explicit operator T() const {
 			T exp = 1, out = 0;
 
-			for (auto n : digets) {
+			for (auto n : digits) {
 				out += exp * n;
 				exp *= Base;
 			}
@@ -211,7 +219,7 @@ namespace ds {
 		explicit operator std::wstring() const {
 			std::wstring out = L"";
 
-			for (auto n : digets)
+			for (auto n : digits)
 				out.insert(std::begin(out), symbols[n]);
 
 			while (out[0] == L'0' && out.size() > 1)
@@ -226,7 +234,7 @@ namespace ds {
 		explicit operator std::string() const {
 			std::string out = "";
 
-			for (auto n : digets)
+			for (auto n : digits)
 				out.insert(std::begin(out), (char)symbols[n]);
 
 			while (out[0] == '0' && out.size() > 1)
@@ -241,6 +249,10 @@ namespace ds {
 
 		void set_symbols(const std::wstring& s) {
 			symbols = s;
+		}
+
+		auto digit_count() const noexcept {
+			return digits.size();
 		}
 
 		static integer negativ_of(const integer& n) {
@@ -258,29 +270,28 @@ namespace ds {
 			}
 			else {
 				integer tmp;
-				auto [_, max] = std::minmax(digets.size(), n.digets.size());
-				size_t num_size = max;
+				auto size = std::max(digits.size(), n.digits.size());
 
-				tmp.digets.reserve(num_size + 1);
-				tmp.digets.resize(num_size);
+				tmp.digits.reserve(size + 1);
+				tmp.digits.resize(size);
 
-				auto this_iter = digets.begin();
-				auto other_iter = n.digets.begin();
-				auto temp_iter = tmp.digets.begin();
+				auto this_iter = digits.begin();
+				auto other_iter = n.digits.begin();
+				auto temp_iter = tmp.digits.begin();
 
-				while (this_iter < digets.end() || other_iter < n.digets.end()) {
-					if (this_iter >= digets.end())
+				while (this_iter < digits.end() || other_iter < n.digits.end()) {
+					if (this_iter >= digits.end())
 						*temp_iter = *other_iter;
-					else if (other_iter >= n.digets.end())
+					else if (other_iter >= n.digits.end())
 						*temp_iter = *this_iter;
 					else
 						*temp_iter = (*this_iter) + (*other_iter);
 
 
-					if (this_iter != digets.end())
+					if (this_iter != digits.end())
 						++this_iter;
 
-					if (other_iter != n.digets.end())
+					if (other_iter != n.digits.end())
 						++other_iter;
 
 					++temp_iter;
@@ -294,20 +305,20 @@ namespace ds {
 		integer operator - (const integer& n) const {
 			size_t old_carry = 0, new_carry = 0;
 			integer tmp = *this;
-			size_t size = std::minmax(digets.size(), n.digets.size()).second;
+			size_t size = std::max(digits.size(), n.digits.size());
 
 			for (size_t i = 0; i < size; i++) {
 				old_carry = new_carry;
 				new_carry = 0;
-				if (tmp.digets[i] == 0 && i == size - 1) {
+				if (tmp.digits[i] == 0 && i == size - 1) {
 					tmp.is_negativ = !tmp.is_negativ;
 				}
-				else if ((long long)tmp.digets[i] - (long long)(n.digets[i] + old_carry) < 0) {
-					(tmp.digets[i] += Base) -= (n.digets[i] + old_carry);
+				else if ((long long)tmp.digits[i] - (long long)(n.digits[i] + old_carry) < 0) {
+					(tmp.digits[i] += Base) -= (n.digits[i] + old_carry);
 					new_carry++;
 				}
 				else {
-					tmp.digets[i] -= (n.digets[i] + old_carry);
+					tmp.digits[i] -= (n.digits[i] + old_carry);
 				}
 			}
 			return tmp;
@@ -316,7 +327,7 @@ namespace ds {
 		integer operator * (long long n) const {
 			integer tmp = *this;
 
-			for (auto&& m : tmp.digets)
+			for (auto&& m : tmp.digits)
 				m *= n;
 
 			distribute(tmp);
@@ -325,16 +336,16 @@ namespace ds {
 
 		integer operator * (const integer& n) const {
 			integer tmp;
-			auto this_size = digets.size();
-			auto other_size = n.digets.size();
-			tmp.digets.reserve(digets.capacity() + n.digets.capacity());
-			tmp.digets.resize(this_size + other_size);
+			auto this_size = digits.size();
+			auto other_size = n.digits.size();
+			tmp.digits.reserve(digits.capacity() + n.digits.capacity());
+			tmp.digits.resize(this_size + other_size);
 
-			std::fill(tmp.digets.begin(), tmp.digets.end(), 0);
+			std::fill(tmp.digits.begin(), tmp.digits.end(), 0);
 
 			for (size_t i = 0; i < this_size; ++i) {
 				for (size_t j = 0; j < other_size; ++j) {
-					tmp.digets[i + j] += digets[i] * n.digets[j];
+					tmp.digits[i + j] += digits[i] * n.digits[j];
 				}
 			}
 
@@ -342,6 +353,13 @@ namespace ds {
 
 			distribute(tmp);
 			return tmp;
+		}
+
+		// TODO: division (operator /)
+		integer operator / (const integer& n) const {
+
+
+			return integer();
 		}
 
 	private:
@@ -367,16 +385,6 @@ namespace ds {
 	using Int_256 = integer<256>;
 	using Int_1024 = integer<1024>;
 
-	/*template < size_t Base >
-	std::wostream& operator << (std::wostream& o, integer<Base>& n) {
-		return (o << static_cast<std::wstring>(n));
-	}
-
-	template < size_t Base >
-	std::ostream& operator << (std::ostream& o, integer<Base>& n) {
-		auto s = static_cast<std::string>(n);
-		return o.write(s.c_str(), s.size());
-	}*/
 
 	template < size_t Base, typename T >
 	std::basic_ostream<T>& operator << (std::basic_ostream<T>& str, const integer<Base>& n) {

@@ -192,12 +192,17 @@ namespace test {
 		std::cout << " j <10> = " << j << '\n';
 		std::cout << " j <32> = " << (ds::integer<32>)j << '\n';
 		std::cout << " k <16> = " << k << '\n';
-		std::cout << " str_test <10> = " << str_test << '\n';
+		std::cout << " str_test <10> = " << str_test << '\n' << '\n';
 
 		// TODO: converiton from large to lower bases is currently brocken
-		std::cout << " l <64 -> 20> = " << (ds::integer<20>)k << '\n';
-		std::cout << " i + j = " << (i + j) << '\n';
-		std::cout << " i * j = " << ds::integer<10>(i * j) << '\n';
+		std::cout << " l <64 -> 10> = " << (ds::Int)l << '\n';
+		std::cout << " j <10 -> 32> = " << (ds::Int_32)j << '\n';
+		std::cout << " i + j = " << ds::Int(i + j) << '\n';
+		std::cout << " i + j = " << ds::Int(i + j) << '\n';
+		std::cout << " i + j = " << ds::Int(i + j) << '\n';
+		std::cout << " i * j = " << ds::Int(i * j) << '\n';
+		std::cout << " i * j = " << ds::Int(i * j) << '\n';
+		std::cout << " i * j = " << ds::Int(i * j) << '\n';
 		std::cout << " j - k = " << k - j << '\n';
 
 
